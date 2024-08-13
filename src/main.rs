@@ -1,3 +1,6 @@
+pub mod net;
+pub mod ui;
+
 fn main() {
-    println!("Hello, world!");
+    ui::start();
 }
