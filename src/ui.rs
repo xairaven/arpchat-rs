@@ -1,1 +1,1 @@
-pub fn start() {}
+pub mod core;
