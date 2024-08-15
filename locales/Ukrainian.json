@@ -7,5 +7,6 @@
   "panic.mac_dropped": "Всі інтерфейси за контрактом повинні мати MAC адресу. Можливо, MAC був скинутий в момент відкриття меню.",
 
   "title.error": "Помилка!",
-  "title.interface_selection": "Оберіть інтерфейс"
+  "title.interface_selection": "Оберіть інтерфейс",
+  "title.language_selection": "Оберіть мову"
 }

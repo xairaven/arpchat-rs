@@ -7,5 +7,6 @@
   "panic.mac_dropped": "All interfaces by contract must have MAC. Maybe, MAC dropped while menu was opening.",
 
   "title.error": "Error!",
-  "title.interface_selection": "Select an Interface"
+  "title.interface_selection": "Select an Interface",
+  "title.language_selection": "Select a Language"
 }
