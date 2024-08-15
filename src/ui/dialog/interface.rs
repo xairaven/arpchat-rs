@@ -1,8 +1,10 @@
 use crate::net;
+use crate::ui::commands;
+use crossbeam::channel::Sender;
 use cursive::views::SelectView;
 use cursive::{traits::Resizable, views::Dialog, Cursive};
 
-pub fn show_interface_select_dialog(siv: &mut Cursive) {
+pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
     let interfaces = net::interface::usable_sorted();
 
     siv.add_layer(
@@ -26,8 +28,28 @@ pub fn show_interface_select_dialog(siv: &mut Cursive) {
                             name_id
                         )
                     }))
-                    .on_submit(|siv, interface_name_id: &String| {
-                        siv.pop_layer();
+                    .on_submit(move |siv, interface_name_id: &String| {
+                        let result = ui_tx.try_send(
+                            commands::UI::SetInterface(
+                                interface_name_id.to_owned()
+                            ));
+
+                        match result {
+                            Ok(_) => {
+                                siv.pop_layer();
+                                // Next steps...
+                            }
+                            Err(err) => {
+                                siv.add_layer(
+                                    Dialog::text(err.to_string())
+                                        .title("Error!")
+                                        .button("Try again!", |siv| {
+                                            siv.pop_layer();
+                                        })
+                                        .button("Quit", |siv| siv.quit()),
+                                );
+                            }
+                        }
                     })
             )
             .button("Quit", |siv| siv.quit())
