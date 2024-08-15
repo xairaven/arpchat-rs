@@ -1,3 +1,11 @@
 {
-  "_version": 1
+  "_version": 1,
+
+  "button.quit": "Quit",
+  "button.try_again": "Try again",
+
+  "panic.mac_dropped": "All interfaces by contract must have MAC. Maybe, MAC dropped while menu was opening.",
+
+  "title.error": "Error!",
+  "title.interface_selection": "Select an Interface"
 }

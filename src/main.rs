@@ -8,7 +8,7 @@ extern crate rust_i18n;
 rust_i18n::i18n!("locales", fallback = "en");
 
 fn main() {
-    rust_i18n::set_locale("en");
+    // rust_i18n::set_locale("ua");
 
     ui::core::start();
 }

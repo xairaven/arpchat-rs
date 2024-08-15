@@ -1,6 +1,6 @@
 use crate::net;
 use crate::ui::commands;
-use crossbeam::channel::Sender;
+use crossbeam::channel::{Sender, TrySendError};
 use cursive::views::SelectView;
 use cursive::{traits::Resizable, views::Dialog, Cursive};
 
@@ -9,7 +9,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
 
     siv.add_layer(
         Dialog::new()
-            .title("Select an Interface")
+            .title(t!("title.interface_selection"))
             .content(
                 SelectView::new()
                     .with_all(interfaces.into_iter().map(|interface| {
@@ -18,7 +18,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                             false => interface.name
                         };
                         let mac = interface.mac
-                            .expect("All interfaces by contract must have MAC. Maybe, MAC dropped while menu was opening.");
+                            .expect(&t!("panic.mac_dropped"));
 
                         const MAC_ALIGN: usize = 17;
                         const NAME_ALIGN: usize = 53;
@@ -33,6 +33,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                             commands::UI::SetInterface(
                                 interface_name_id.to_owned()
                             ));
+                        let result: Result<(), TrySendError<()>> = Err(TrySendError::Full(()));
 
                         match result {
                             Ok(_) => {
@@ -42,17 +43,17 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                             Err(err) => {
                                 siv.add_layer(
                                     Dialog::text(err.to_string())
-                                        .title("Error!")
-                                        .button("Try again!", |siv| {
+                                        .title(t!("title.error"))
+                                        .button(t!("button.try_again"), |siv| {
                                             siv.pop_layer();
                                         })
-                                        .button("Quit", |siv| siv.quit()),
+                                        .button(t!("button.quit"), |siv| siv.quit()),
                                 );
                             }
                         }
                     })
             )
-            .button("Quit", |siv| siv.quit())
+            .button(t!("button.quit"), |siv| siv.quit())
             .min_width(72)
     );
 }
