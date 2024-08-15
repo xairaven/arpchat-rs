@@ -1,13 +1,21 @@
 {
   "_version": 1,
 
+  "button.ok": "OK",
   "button.save": "Save",
-  "button.quit": "Quit",
   "button.try_again": "Try again",
+  "button.quit": "Quit",
+
+  "menu.change_username": "Change username",
+  "menu.help": "Help",
+  "menu.quit": "Quit",
 
   "panic.mac_dropped": "All interfaces by contract must have MAC. Maybe, MAC dropped while menu was opening.",
 
+  "text.help": "Change window section - Tab\nMove around the window - arrows\nSwitch to menu - Esc",
+
   "title.error": "Error!",
+  "title.help": "Help",
   "title.interface_selection": "Select an Interface",
   "title.language_selection": "Select a Language",
   "title.username_selection": "Set an Username"

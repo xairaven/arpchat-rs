@@ -1,13 +1,21 @@
 {
   "_version": 1,
 
+  "button.ok": "Зрозуміло!",
   "button.save": "Зберегти",
-  "button.quit": "Вихід",
   "button.try_again": "Спробувати ще раз",
+  "button.quit": "Вихід",
+
+  "menu.change_username": "Змінити нікнейм",
+  "menu.help": "Довідка",
+  "menu.quit": "Вихід",
 
   "panic.mac_dropped": "Всі інтерфейси за контрактом повинні мати MAC адресу. Можливо, MAC був скинутий в момент відкриття меню.",
 
+  "text.help": "Змінити секцію вікна - Tab\nПереміщення по елементу - стрілки\nПеремикання на меню - Esc",
+
   "title.error": "Помилка!",
+  "title.help": "Довідка",
   "title.interface_selection": "Оберіть інтерфейс",
   "title.language_selection": "Оберіть мову",
   "title.username_selection": "Встановіть ім'я користувача"
