@@ -1,6 +1,7 @@
 {
   "_version": 1,
 
+  "button.save": "Save",
   "button.quit": "Quit",
   "button.try_again": "Try again",
 
@@ -8,5 +9,6 @@
 
   "title.error": "Error!",
   "title.interface_selection": "Select an Interface",
-  "title.language_selection": "Select a Language"
+  "title.language_selection": "Select a Language",
+  "title.username_selection": "Set an Username"
 }

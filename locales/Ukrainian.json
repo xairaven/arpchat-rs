@@ -1,6 +1,7 @@
 {
   "_version": 1,
 
+  "button.save": "Зберегти",
   "button.quit": "Вихід",
   "button.try_again": "Спробувати ще раз",
 
@@ -8,5 +9,6 @@
 
   "title.error": "Помилка!",
   "title.interface_selection": "Оберіть інтерфейс",
-  "title.language_selection": "Оберіть мову"
+  "title.language_selection": "Оберіть мову",
+  "title.username_selection": "Встановіть ім'я користувача"
 }

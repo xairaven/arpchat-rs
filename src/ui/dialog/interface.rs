@@ -40,7 +40,10 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                         match result {
                             Ok(_) => {
                                 siv.pop_layer();
-                                // Next steps...
+                                ui::dialog::username::show_input_dialog(
+                                    siv,
+                                    ui_tx.clone(),
+                                )
                             },
                             Err(err) => {
                                 ui::dialog::error::show_try_again(
