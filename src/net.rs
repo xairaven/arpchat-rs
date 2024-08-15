@@ -1,3 +1,5 @@
+pub mod interface;
+
 const ARP_HTYPE_ETHERNET: u16 = 0x0001; // ARP Hardware type. Ethernet - IEEE 802 Numbers
 const ARP_HADRR_LENGTH: u8 = 6; // ARP Hardware length in bytes. MAC - 6 bytes
 
