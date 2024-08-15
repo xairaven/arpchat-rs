@@ -7,7 +7,8 @@ pub fn start() {
 
     let mut siv = cursive::default();
 
-    dialog::interface::show_select_dialog(&mut siv, ui_tx);
+    dialog::localization::show_select_dialog(&mut siv, ui_tx);
+    // dialog::interface::show_select_dialog(&mut siv, ui_tx);
 
     siv.run();
 }
