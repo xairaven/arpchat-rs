@@ -5,6 +5,7 @@ use cursive::views::SelectView;
 use cursive::{traits::Resizable, views::Dialog, Cursive};
 
 pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
+    const MAIN_WINDOW_INITIALIZED: bool = false;
     let interfaces = net::interface::usable_sorted();
 
     siv.add_layer(
@@ -40,9 +41,11 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                         match result {
                             Ok(_) => {
                                 siv.pop_layer();
+
                                 ui::dialog::username::show_input_dialog(
                                     siv,
                                     ui_tx.clone(),
+                                    MAIN_WINDOW_INITIALIZED,
                                 )
                             },
                             Err(err) => {

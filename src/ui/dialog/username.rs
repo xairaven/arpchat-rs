@@ -5,7 +5,9 @@ use cursive::view::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView};
 use cursive::Cursive;
 
-pub fn show_input_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
+pub fn show_input_dialog(
+    siv: &mut Cursive, ui_tx: Sender<commands::UI>, main_initialized: bool,
+) {
     siv.add_layer(
         Dialog::new()
             .title(t!("title.username_selection"))
@@ -29,7 +31,12 @@ pub fn show_input_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                             match result {
                                 Ok(_) => {
                                     siv.pop_layer();
-                                    // Next steps...
+                                    if !main_initialized {
+                                        ui::main_window::init(
+                                            siv,
+                                            ui_tx.clone(),
+                                        );
+                                    }
                                 },
                                 Err(err) => {
                                     ui::dialog::error::show_try_again(
@@ -54,7 +61,9 @@ pub fn show_input_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                 match result {
                     Ok(_) => {
                         siv.pop_layer();
-                        // Next steps...
+                        if !main_initialized {
+                            ui::main_window::init(siv, ui_tx.clone());
+                        }
                     },
                     Err(err) => {
                         ui::dialog::error::show_try_again(siv, err.to_string());
