@@ -1,6 +1,7 @@
 {
   "_version": 1,
 
+  "button.close": "Close",
   "button.ok": "OK",
   "button.save": "Save",
   "button.try_again": "Try again",
