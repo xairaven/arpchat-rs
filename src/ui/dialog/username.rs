@@ -1,6 +1,6 @@
 use crate::ui;
 use crate::ui::commands;
-use crossbeam::channel::Sender;
+use crossbeam::channel::{Sender, TrySendError};
 use cursive::view::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView};
 use cursive::Cursive;
@@ -27,20 +27,12 @@ pub fn show_input_dialog(
                             username.to_owned(),
                         ));
 
-                        match result {
-                            Ok(_) => {
-                                siv.pop_layer();
-                                if !main_initialized {
-                                    ui::main_window::init(siv, ui_tx.clone());
-                                }
-                            },
-                            Err(err) => {
-                                ui::dialog::error::show_try_again(
-                                    siv,
-                                    err.to_string(),
-                                );
-                            },
-                        }
+                        process_operation_result(
+                            siv,
+                            main_initialized,
+                            ui_tx.clone(),
+                            result,
+                        );
                     }
                 })
                 .with_name("username_input"),
@@ -54,17 +46,12 @@ pub fn show_input_dialog(
             let result =
                 ui_tx.try_send(commands::UI::SetUsername(username.to_string()));
 
-            match result {
-                Ok(_) => {
-                    siv.pop_layer();
-                    if !main_initialized {
-                        ui::main_window::init(siv, ui_tx.clone());
-                    }
-                },
-                Err(err) => {
-                    ui::dialog::error::show_try_again(siv, err.to_string());
-                },
-            }
+            process_operation_result(
+                siv,
+                main_initialized,
+                ui_tx.clone(),
+                result,
+            );
         });
 
     // If window is initialized, "Close/quit button" will close dialog.
@@ -79,4 +66,23 @@ pub fn show_input_dialog(
     .min_width(72);
 
     siv.add_layer(dialog);
+}
+
+fn process_operation_result(
+    siv: &mut Cursive, main_initialized: bool, ui_tx: Sender<commands::UI>,
+    result: Result<(), TrySendError<commands::UI>>,
+) {
+    match result {
+        // If username set, initialize main window / close dialog
+        Ok(_) => {
+            siv.pop_layer();
+            if !main_initialized {
+                ui::main_window::init(siv, ui_tx.clone());
+            }
+        },
+        // Otherwise, user have to try again
+        Err(err) => {
+            ui::dialog::error::show_try_again(siv, err.to_string());
+        },
+    }
 }
