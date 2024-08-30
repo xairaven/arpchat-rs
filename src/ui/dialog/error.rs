@@ -12,3 +12,14 @@ pub fn show_try_again(siv: &mut Cursive, err: impl fmt::Display) {
             .button(t!("button.quit"), |siv| siv.quit()),
     );
 }
+
+pub fn show(siv: &mut Cursive, err: impl fmt::Display) {
+    siv.add_layer(
+        Dialog::text(err.to_string())
+            .title(t!("title.error"))
+            .button(t!("button.ok"), |siv| {
+                siv.pop_layer();
+            })
+            .button(t!("button.quit"), |siv| siv.quit()),
+    );
+}
