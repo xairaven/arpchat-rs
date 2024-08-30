@@ -17,6 +17,7 @@ pub fn start() {
     while event_loop.is_running() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
+                UI::SendMessage(_) => {},
                 UI::SetInterface(_) => {},
                 UI::SetLanguage(_) => {},
                 UI::SetUsername(_) => {},
