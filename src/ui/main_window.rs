@@ -1,8 +1,10 @@
 use crate::ui;
 use crate::ui::commands;
-use crossbeam::channel::Sender;
+use crossbeam::channel::{Sender, TrySendError};
 use cursive::event::Key;
-use cursive::views::Dialog;
+use cursive::traits::{Nameable, Resizable, Scrollable};
+use cursive::view::ScrollStrategy;
+use cursive::views::{Dialog, EditView, LinearLayout, Panel};
 use cursive::Cursive;
 
 pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
@@ -27,6 +29,46 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
         .add_leaf(t!("menu.quit"), |siv| siv.quit());
     siv.set_autohide_menu(AUTOHIDE_MENU);
     siv.add_global_callback(Key::Esc, |siv| siv.select_menubar());
+
+    siv.add_fullscreen_layer(
+        LinearLayout::horizontal().child(
+            LinearLayout::vertical()
+                .child(
+                    Panel::new(
+                        LinearLayout::vertical()
+                            .with_name("chat_area")
+                            .full_height()
+                            .full_width()
+                            .scrollable()
+                            .scroll_strategy(ScrollStrategy::StickToBottom),
+                    )
+                    .full_height()
+                    .full_width(),
+                )
+                .child(
+                    Panel::new(
+                        EditView::new()
+                            .on_submit(move |siv, msg| {
+                                siv.call_on_name(
+                                    "chat_input",
+                                    |input: &mut EditView| {
+                                        input.set_content("");
+                                    },
+                                );
+
+                                let result = ui_tx.try_send(
+                                    commands::UI::SendMessage(msg.to_string()),
+                                );
+
+                                process_operation_result(siv, result)
+                            })
+                            .with_name("chat_input"),
+                    )
+                    .full_width(),
+                )
+                .full_width(),
+        ),
+    );
 }
 
 fn show_help_dialog(siv: &mut Cursive) {
@@ -37,4 +79,17 @@ fn show_help_dialog(siv: &mut Cursive) {
                 siv.pop_layer();
             }),
     );
+}
+
+fn process_operation_result(
+    siv: &mut Cursive, result: Result<(), TrySendError<commands::UI>>,
+) {
+    match result {
+        Ok(_) => {
+            siv.pop_layer();
+        },
+        Err(err) => {
+            ui::dialog::error::show_try_again(siv, err.to_string());
+        },
+    }
 }
