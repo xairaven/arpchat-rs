@@ -8,6 +8,8 @@ pub fn start() {
     let (net_tx, net_rx) = unbounded::<commands::Net>();
 
     let mut siv = cursive::default();
+    siv.load_toml(include_str!("../../assets/styles.toml"))
+        .expect("Styles are not loaded. Please, provide ./assets/styles.toml");
 
     dialog::localization::show_select_dialog(&mut siv, ui_tx);
 
