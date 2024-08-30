@@ -9,7 +9,6 @@ use cursive::Cursive;
 
 pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
     const AUTOHIDE_MENU: bool = false;
-    show_help_dialog(siv);
 
     siv.menubar()
         .add_leaf(t!("menu.change_username"), {
@@ -60,7 +59,9 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                                     commands::UI::SendMessage(msg.to_string()),
                                 );
 
-                                process_operation_result(siv, result)
+                                if let Err(err) = result {
+                                    ui::dialog::error::show_try_again(siv, err.to_string());
+                                }
                             })
                             .with_name("chat_input"),
                     )
@@ -69,6 +70,8 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                 .full_width(),
         ),
     );
+
+    show_help_dialog(siv);
 }
 
 fn show_help_dialog(siv: &mut Cursive) {
@@ -79,17 +82,4 @@ fn show_help_dialog(siv: &mut Cursive) {
                 siv.pop_layer();
             }),
     );
-}
-
-fn process_operation_result(
-    siv: &mut Cursive, result: Result<(), TrySendError<commands::UI>>,
-) {
-    match result {
-        Ok(_) => {
-            siv.pop_layer();
-        },
-        Err(err) => {
-            ui::dialog::error::show_try_again(siv, err.to_string());
-        },
-    }
 }
