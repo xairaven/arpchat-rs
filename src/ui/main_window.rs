@@ -1,6 +1,6 @@
 use crate::ui;
 use crate::ui::commands;
-use crossbeam::channel::{Sender, TrySendError};
+use crossbeam::channel::Sender;
 use cursive::event::Key;
 use cursive::traits::{Nameable, Resizable, Scrollable};
 use cursive::view::ScrollStrategy;
@@ -30,45 +30,64 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
     siv.add_global_callback(Key::Esc, |siv| siv.select_menubar());
 
     siv.add_fullscreen_layer(
-        LinearLayout::horizontal().child(
-            LinearLayout::vertical()
-                .child(
-                    Panel::new(
-                        LinearLayout::vertical()
-                            .with_name("chat_area")
-                            .full_height()
-                            .full_width()
-                            .scrollable()
-                            .scroll_strategy(ScrollStrategy::StickToBottom),
+        LinearLayout::horizontal()
+            .child(
+                LinearLayout::vertical()
+                    .child(
+                        Panel::new(
+                            LinearLayout::vertical()
+                                .with_name("chat_area")
+                                .full_height()
+                                .full_width()
+                                .scrollable()
+                                .scroll_strategy(ScrollStrategy::StickToBottom),
+                        )
+                        .full_height()
+                        .full_width(),
                     )
-                    .full_height()
-                    .full_width(),
-                )
-                .child(
-                    Panel::new(
-                        EditView::new()
-                            .on_submit(move |siv, msg| {
-                                siv.call_on_name(
-                                    "chat_input",
-                                    |input: &mut EditView| {
-                                        input.set_content("");
-                                    },
-                                );
+                    .child(
+                        Panel::new(
+                            EditView::new()
+                                .on_submit(move |siv, msg| {
+                                    siv.call_on_name(
+                                        "chat_input",
+                                        |input: &mut EditView| {
+                                            input.set_content("");
+                                        },
+                                    );
 
-                                let result = ui_tx.try_send(
-                                    commands::UI::SendMessage(msg.to_string()),
-                                );
+                                    let result = ui_tx.try_send(
+                                        commands::UI::SendMessage(
+                                            msg.to_string(),
+                                        ),
+                                    );
 
-                                if let Err(err) = result {
-                                    ui::dialog::error::show_try_again(siv, err.to_string());
-                                }
-                            })
-                            .with_name("chat_input"),
+                                    if let Err(err) = result {
+                                        ui::dialog::error::show_try_again(
+                                            siv,
+                                            err.to_string(),
+                                        );
+                                    }
+                                })
+                                .with_name("chat_input"),
+                        )
+                        .full_width(),
                     )
                     .full_width(),
+            )
+            .child(
+                Panel::new(
+                    LinearLayout::vertical()
+                        .with_name("online_panel")
+                        .full_height()
+                        .full_width()
+                        .scrollable()
+                        .scroll_strategy(ScrollStrategy::StickToBottom),
                 )
-                .full_width(),
-        ),
+                .title(t!("title.online_users"))
+                .full_height()
+                .fixed_width(32),
+            ),
     );
 
     show_help_dialog(siv);
