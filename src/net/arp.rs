@@ -12,8 +12,8 @@ const OPCODE_REPLY: u8 = 0x1;
 const PACKET_PREFIX: &[u8] = b"xai";
 
 // Id consists of 8 bytes.
-const ID_SIZE_BYTES: usize = 8;
-type Id = [u8; ID_SIZE_BYTES];
+pub const ID_SIZE_BYTES: usize = 8;
+pub type Id = [u8; ID_SIZE_BYTES];
 
 // Packet Header size consists of packet prefix, id size, Tag, Seq and total
 const PACKET_HEADER_SIZE: usize = PACKET_PREFIX.len() + ID_SIZE_BYTES + 3;
