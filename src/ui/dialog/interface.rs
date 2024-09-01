@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::ui::commands;
 use crate::{net, ui};
 use crossbeam::channel::Sender;
@@ -8,6 +9,17 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
     const MAIN_WINDOW_INITIALIZED: bool = false;
     let interfaces = net::interface::usable_sorted();
 
+    let preferred_interface_index = CONFIG
+        .try_lock()
+        .ok()
+        .and_then(|locked_config| locked_config.interface_name.clone())
+        .and_then(|config_interface_name| {
+            interfaces
+                .iter()
+                .position(|interface| interface.name.eq(&config_interface_name))
+        })
+        .unwrap_or_default();
+
     siv.add_layer(
         Dialog::new()
             .title(t!("title.interface_selection"))
@@ -15,8 +27,8 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                 SelectView::new()
                     .with_all(interfaces.into_iter().map(|interface| {
                         let name_id = match !&interface.description.is_empty() {
-                            true => interface.description,
-                            false => interface.name,
+                            true => interface.description.to_owned(),
+                            false => interface.name.to_owned(),
                         };
                         let mac =
                             interface.mac.expect(&t!("panic.mac_dropped"));
@@ -29,9 +41,10 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                                 "{:<NAME_ALIGN$}[{:>MAC_ALIGN$}]",
                                 name_id, mac
                             ),
-                            name_id,
+                            interface.name.to_owned(),
                         )
                     }))
+                    .selected(preferred_interface_index)
                     .on_submit(move |siv, interface_name_id: &String| {
                         let result =
                             ui_tx.try_send(commands::UI::SetInterface(
