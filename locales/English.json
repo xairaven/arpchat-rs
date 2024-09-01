@@ -9,14 +9,17 @@
 
   "menu.change_username": "Change username",
   "menu.help": "Help",
+  "menu.switch_protocol": "Switch Protocol",
   "menu.quit": "Quit",
 
   "panic.mac_dropped": "All interfaces by contract must have MAC. Maybe, MAC dropped while menu was opening.",
 
+  "text.ether_types": "Experimental versions 1 and 2 are more standards-compliant and generally more considerate towards other devices.\nIPv4 might offer better reliability on some networks.\n\n",
   "text.help": "Change window section - Tab\nMove around the window - arrows\nSwitch to menu - Esc",
 
   "title.error": "Error!",
   "title.help": "Help",
+  "title.protocol_selection": "Select a Protocol",
   "title.interface_selection": "Select an Interface",
   "title.language_selection": "Select a Language",
   "title.online_users": "Online Users",

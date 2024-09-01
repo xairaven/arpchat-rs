@@ -23,15 +23,22 @@ pub fn start() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
                 UICommand::SendMessage(_) => {},
+                UICommand::SetEtherType(ether_type) => {
+                    ui::commands::set_ether_type(
+                        ether_type,
+                        &mut event_loop,
+                        &net_tx,
+                    );
+                },
                 UICommand::SetInterface(interface_name) => {
                     ui::commands::set_interface(
                         interface_name,
                         &mut event_loop,
                         &net_tx,
-                    )
+                    );
                 },
                 UICommand::SetLanguage(language) => {
-                    ui::commands::set_language(language)
+                    ui::commands::set_language(language);
                 },
                 UICommand::SetUsername(username) => ui::commands::set_username(
                     username,

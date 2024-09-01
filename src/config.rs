@@ -1,4 +1,5 @@
 use crate::error::config::ConfigError;
+use crate::net::ether_type::EtherType;
 use crate::ui;
 use directories::ProjectDirs;
 use rust_i18n::once_cell::sync::Lazy;
@@ -15,6 +16,7 @@ const CONFIG_FILENAME: &str = "config.toml";
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Config {
+    pub ether_type: Option<EtherType>,
     pub interface_name: Option<String>,
     pub language: Option<String>,
     pub username: Option<String>,

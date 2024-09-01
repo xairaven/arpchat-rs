@@ -26,6 +26,13 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
             }
         })
         .add_delimiter()
+        .add_leaf(t!("menu.switch_protocol"), {
+            let ui_tx = ui_tx.clone();
+            move |siv| {
+                ui::dialog::ether_type::show_select_dialog(siv, ui_tx.clone())
+            }
+        })
+        .add_delimiter()
         .add_leaf(t!("menu.help"), show_help_dialog)
         .add_delimiter()
         .add_leaf(t!("menu.quit"), |siv| ui::core::quit(siv));

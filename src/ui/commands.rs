@@ -1,5 +1,6 @@
 use crate::config::CONFIG;
 use crate::net::commands::NetCommand;
+use crate::net::ether_type::EtherType;
 use crate::{config, ui};
 use crossbeam::channel::Sender;
 use cursive::Cursive;
@@ -7,9 +8,26 @@ use cursive::Cursive;
 pub enum UICommand {
     SendMessage(String),
 
+    SetEtherType(EtherType),
     SetInterface(String),
     SetLanguage(String),
     SetUsername(String),
+}
+
+pub fn set_ether_type(
+    ether_type: EtherType, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
+) {
+    let result = net_tx.try_send(NetCommand::SetEtherType(ether_type.clone()));
+
+    if let Err(err) = result {
+        ui::dialog::error::show_try_again(siv, err.to_string());
+        return;
+    }
+
+    if let Ok(mut config) = CONFIG.try_lock() {
+        config.ether_type = Some(ether_type);
+        config.save().unwrap_or_default();
+    }
 }
 
 pub fn set_interface(

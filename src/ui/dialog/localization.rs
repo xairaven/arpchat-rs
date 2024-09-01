@@ -15,7 +15,6 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
         .and_then(|config_lang| {
             locales.iter().position(|lang| lang.eq(&config_lang))
         })
-        .filter(|index| index < &locales.len())
         .unwrap_or_default();
 
     siv.add_layer(
