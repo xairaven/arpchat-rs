@@ -15,6 +15,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
         .and_then(|config_lang| {
             locales.iter().position(|lang| lang.eq(&config_lang))
         })
+        .filter(|index| index < &locales.len())
         .unwrap_or_default();
 
     siv.add_layer(
@@ -26,13 +27,10 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                         (language.to_string(), language.to_owned())
                     }))
                     .selected(preferred_language_index)
-                    .on_submit(move |siv, language_name_id: &String| {
+                    .on_submit(move |siv, language: &String| {
                         let result = ui_tx.try_send(UICommand::SetLanguage(
-                            language_name_id.to_string(),
+                            language.to_string(),
                         ));
-                        //////////////// TEMPORARY
-                        rust_i18n::set_locale(language_name_id);
-                        ////////////////
 
                         match result {
                             Ok(_) => {

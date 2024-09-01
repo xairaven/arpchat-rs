@@ -24,7 +24,9 @@ pub fn start() {
             match command {
                 UICommand::SendMessage(_) => {},
                 UICommand::SetInterface(_) => {},
-                UICommand::SetLanguage(_) => {},
+                UICommand::SetLanguage(language) => {
+                    ui::commands::set_language(language)
+                },
                 UICommand::SetUsername(username) => ui::commands::set_username(
                     username,
                     &mut event_loop,

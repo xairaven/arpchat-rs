@@ -12,6 +12,15 @@ pub enum UICommand {
     SetUsername(String),
 }
 
+pub fn set_language(language: String) {
+    rust_i18n::set_locale(&language);
+
+    if let Ok(mut config) = CONFIG.try_lock() {
+        config.language = Some(language);
+        config.save().unwrap_or_default();
+    }
+}
+
 pub fn set_username(
     username: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
 ) {
