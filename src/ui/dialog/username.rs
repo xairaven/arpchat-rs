@@ -55,7 +55,7 @@ pub fn show_input_dialog(
             siv.pop_layer();
         })
     } else {
-        dialog.button(t!("button.quit"), |siv| siv.quit())
+        dialog.button(t!("button.quit"), |siv| ui::core::quit(siv))
     }
     .min_width(72);
 

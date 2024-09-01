@@ -40,7 +40,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                         }
                     }),
             )
-            .button(t!("button.quit"), |siv| siv.quit())
+            .button(t!("button.quit"), |siv| ui::core::quit(siv))
             .min_width(32),
     );
 }

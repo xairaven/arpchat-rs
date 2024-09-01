@@ -25,7 +25,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
         .add_delimiter()
         .add_leaf(t!("menu.help"), show_help_dialog)
         .add_delimiter()
-        .add_leaf(t!("menu.quit"), |siv| siv.quit());
+        .add_leaf(t!("menu.quit"), |siv| ui::core::quit(siv));
     siv.set_autohide_menu(AUTOHIDE_MENU);
     siv.add_global_callback(Key::Esc, |siv| siv.select_menubar());
 

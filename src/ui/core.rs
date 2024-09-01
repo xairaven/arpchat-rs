@@ -2,6 +2,7 @@ use crate::config::CONFIG;
 use crate::ui::commands::UI;
 use crate::ui::{commands, dialog};
 use crossbeam::channel::unbounded;
+use cursive::Cursive;
 
 pub fn start() {
     let (ui_tx, ui_rx) = unbounded::<commands::UI>();
@@ -30,6 +31,10 @@ pub fn start() {
 
         event_loop.step();
     }
+}
+
+pub fn quit(siv: &mut Cursive) {
+    siv.quit();
 
     if let Ok(config) = CONFIG.try_lock() {
         config.save().unwrap_or_default();
