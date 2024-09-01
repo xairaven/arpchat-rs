@@ -62,3 +62,21 @@ impl Config {
         Ok(current_dir)
     }
 }
+
+/// Getting username from config.
+/// If there's no username in config, using system hostname.
+pub fn get_username() -> String {
+    CONFIG
+        .try_lock()
+        .ok()
+        .and_then(|locked_config| locked_config.username.clone())
+        .filter(|username| !username.is_empty())
+        .unwrap_or_else(|| {
+            gethostname::gethostname()
+                .to_string_lossy()
+                .split('.')
+                .next()
+                .unwrap_or("")
+                .to_string()
+        })
+}

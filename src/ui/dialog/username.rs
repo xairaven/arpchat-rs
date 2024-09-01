@@ -1,3 +1,4 @@
+use crate::config;
 use crate::ui;
 use crate::ui::commands;
 use crossbeam::channel::{Sender, TrySendError};
@@ -12,14 +13,7 @@ pub fn show_input_dialog(
         .title(t!("title.username_selection"))
         .content(
             EditView::new()
-                .content(
-                    gethostname::gethostname()
-                        .to_string_lossy()
-                        .split('.')
-                        .next()
-                        .unwrap_or("")
-                        .to_string(),
-                )
+                .content(config::get_username())
                 .on_submit({
                     let ui_tx = ui_tx.clone();
                     move |siv, username| {
