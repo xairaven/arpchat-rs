@@ -1,13 +1,14 @@
 use crate::config;
 use crate::ui;
-use crate::ui::commands;
+use crate::ui::commands::UICommand;
 use crossbeam::channel::{Sender, TrySendError};
 use cursive::view::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView};
 use cursive::Cursive;
 
 pub fn show_input_dialog(
-    siv: &mut Cursive, ui_tx: Sender<commands::UI>, main_initialized: bool,
+    siv: &mut Cursive, ui_tx: Sender<UICommand>,
+    main_initialized: bool,
 ) {
     let dialog = Dialog::new()
         .title(t!("title.username_selection"))
@@ -17,9 +18,10 @@ pub fn show_input_dialog(
                 .on_submit({
                     let ui_tx = ui_tx.clone();
                     move |siv, username| {
-                        let result = ui_tx.try_send(commands::UI::SetUsername(
-                            username.to_owned(),
-                        ));
+                        let result =
+                            ui_tx.try_send(UICommand::SetUsername(
+                                username.to_owned(),
+                            ));
 
                         process_operation_result(
                             siv,
@@ -37,8 +39,9 @@ pub fn show_input_dialog(
                     input.get_content()
                 })
                 .unwrap();
-            let result =
-                ui_tx.try_send(commands::UI::SetUsername(username.to_string()));
+            let result = ui_tx.try_send(UICommand::SetUsername(
+                username.to_string(),
+            ));
 
             process_operation_result(
                 siv,
@@ -63,8 +66,9 @@ pub fn show_input_dialog(
 }
 
 fn process_operation_result(
-    siv: &mut Cursive, main_initialized: bool, ui_tx: Sender<commands::UI>,
-    result: Result<(), TrySendError<commands::UI>>,
+    siv: &mut Cursive, main_initialized: bool,
+    ui_tx: Sender<UICommand>,
+    result: Result<(), TrySendError<UICommand>>,
 ) {
     match result {
         // If username set, initialize main window / close dialog

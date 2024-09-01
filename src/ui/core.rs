@@ -1,12 +1,13 @@
 use crate::config::CONFIG;
-use crate::ui::commands::UI;
-use crate::ui::{commands, dialog};
+use crate::net::commands::NetCommand;
+use crate::ui::commands::UICommand;
+use crate::ui::dialog;
 use crossbeam::channel::unbounded;
 use cursive::Cursive;
 
 pub fn start() {
-    let (ui_tx, ui_rx) = unbounded::<commands::UI>();
-    let (net_tx, net_rx) = unbounded::<commands::Net>();
+    let (ui_tx, ui_rx) = unbounded::<UICommand>();
+    let (net_tx, net_rx) = unbounded::<NetCommand>();
 
     let mut siv = cursive::default();
     siv.load_toml(include_str!("../../assets/styles.toml"))
@@ -20,10 +21,10 @@ pub fn start() {
     while event_loop.is_running() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
-                UI::SendMessage(_) => {},
-                UI::SetInterface(_) => {},
-                UI::SetLanguage(_) => {},
-                UI::SetUsername(_) => {},
+                UICommand::SendMessage(_) => {},
+                UICommand::SetInterface(_) => {},
+                UICommand::SetLanguage(_) => {},
+                UICommand::SetUsername(_) => {},
             }
 
             event_loop.refresh();

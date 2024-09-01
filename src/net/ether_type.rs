@@ -5,12 +5,14 @@ use serde::{Deserialize, Serialize};
 /// 0800 -> Internet Protocol version 4 (IPv4) <br>
 /// 88B5 -> IEEE Std 802 - Local Experimental Ethertype <br>
 /// 88B6 -> IEEE Std 802 - Local Experimental Ethertype
-#[derive(Default, Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(
+    Default, Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq,
+)]
 pub enum EtherType {
     #[default]
     Experimental1,
     Experimental2,
-    IPv4
+    IPv4,
 }
 
 impl EtherType {

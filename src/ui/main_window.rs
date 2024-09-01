@@ -1,5 +1,5 @@
 use crate::ui;
-use crate::ui::commands;
+use crate::ui::commands::UICommand;
 use crossbeam::channel::Sender;
 use cursive::event::Key;
 use cursive::traits::{Nameable, Resizable, Scrollable};
@@ -7,7 +7,7 @@ use cursive::view::ScrollStrategy;
 use cursive::views::{Dialog, EditView, LinearLayout, Panel};
 use cursive::Cursive;
 
-pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
+pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     const AUTOHIDE_MENU: bool = false;
 
     siv.menubar()
@@ -57,7 +57,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                                     );
 
                                     let result = ui_tx.try_send(
-                                        commands::UI::SendMessage(
+                                        UICommand::SendMessage(
                                             msg.to_string(),
                                         ),
                                     );

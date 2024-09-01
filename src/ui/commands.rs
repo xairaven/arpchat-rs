@@ -1,11 +1,7 @@
-pub enum UI {
+pub enum UICommand {
     SendMessage(String),
 
     SetInterface(String),
     SetLanguage(String),
     SetUsername(String),
-}
-
-pub enum Net {
-    UpdateUsername(String),
 }

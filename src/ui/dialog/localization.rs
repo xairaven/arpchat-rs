@@ -1,11 +1,13 @@
 use crate::config::CONFIG;
 use crate::ui;
-use crate::ui::commands;
+use crate::ui::commands::UICommand;
 use crossbeam::channel::Sender;
 use cursive::views::SelectView;
 use cursive::{traits::Resizable, views::Dialog, Cursive};
 
-pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
+pub fn show_select_dialog(
+    siv: &mut Cursive, ui_tx: Sender<UICommand>,
+) {
     let locales = rust_i18n::available_locales!();
 
     let preferred_language_index: usize = CONFIG
@@ -27,9 +29,10 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                     }))
                     .selected(preferred_language_index)
                     .on_submit(move |siv, language_name_id: &String| {
-                        let result = ui_tx.try_send(commands::UI::SetLanguage(
-                            language_name_id.to_string(),
-                        ));
+                        let result =
+                            ui_tx.try_send(UICommand::SetLanguage(
+                                language_name_id.to_string(),
+                            ));
                         //////////////// TEMPORARY
                         rust_i18n::set_locale(language_name_id);
                         ////////////////
