@@ -17,3 +17,4 @@ toml = "0.8.19"
 serde = { version = "1.0.209", features = ["derive"] }
 strum = { version = "0.26.3", features = ["strum_macros"]}
 strum_macros = "0.26.4"
+smaz = "0.1.0"
