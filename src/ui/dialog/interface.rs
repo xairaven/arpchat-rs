@@ -5,9 +5,7 @@ use crossbeam::channel::Sender;
 use cursive::views::SelectView;
 use cursive::{traits::Resizable, views::Dialog, Cursive};
 
-pub fn show_select_dialog(
-    siv: &mut Cursive, ui_tx: Sender<UICommand>,
-) {
+pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     const MAIN_WINDOW_INITIALIZED: bool = false;
     let interfaces = net::interface::usable_sorted();
 
@@ -48,10 +46,9 @@ pub fn show_select_dialog(
                     }))
                     .selected(preferred_interface_index)
                     .on_submit(move |siv, interface_name_id: &String| {
-                        let result =
-                            ui_tx.try_send(UICommand::SetInterface(
-                                interface_name_id.to_owned(),
-                            ));
+                        let result = ui_tx.try_send(UICommand::SetInterface(
+                            interface_name_id.to_owned(),
+                        ));
 
                         match result {
                             Ok(_) => {

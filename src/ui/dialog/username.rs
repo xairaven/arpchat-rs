@@ -7,8 +7,7 @@ use cursive::views::{Dialog, EditView};
 use cursive::Cursive;
 
 pub fn show_input_dialog(
-    siv: &mut Cursive, ui_tx: Sender<UICommand>,
-    main_initialized: bool,
+    siv: &mut Cursive, ui_tx: Sender<UICommand>, main_initialized: bool,
 ) {
     let dialog = Dialog::new()
         .title(t!("title.username_selection"))
@@ -18,10 +17,9 @@ pub fn show_input_dialog(
                 .on_submit({
                     let ui_tx = ui_tx.clone();
                     move |siv, username| {
-                        let result =
-                            ui_tx.try_send(UICommand::SetUsername(
-                                username.to_owned(),
-                            ));
+                        let result = ui_tx.try_send(UICommand::SetUsername(
+                            username.to_owned(),
+                        ));
 
                         process_operation_result(
                             siv,
@@ -39,9 +37,8 @@ pub fn show_input_dialog(
                     input.get_content()
                 })
                 .unwrap();
-            let result = ui_tx.try_send(UICommand::SetUsername(
-                username.to_string(),
-            ));
+            let result =
+                ui_tx.try_send(UICommand::SetUsername(username.to_string()));
 
             process_operation_result(
                 siv,
@@ -66,8 +63,7 @@ pub fn show_input_dialog(
 }
 
 fn process_operation_result(
-    siv: &mut Cursive, main_initialized: bool,
-    ui_tx: Sender<UICommand>,
+    siv: &mut Cursive, main_initialized: bool, ui_tx: Sender<UICommand>,
     result: Result<(), TrySendError<UICommand>>,
 ) {
     match result {

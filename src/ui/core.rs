@@ -1,5 +1,6 @@
 use crate::config::CONFIG;
 use crate::net::commands::NetCommand;
+use crate::ui;
 use crate::ui::commands::UICommand;
 use crate::ui::dialog;
 use crossbeam::channel::unbounded;
@@ -24,7 +25,11 @@ pub fn start() {
                 UICommand::SendMessage(_) => {},
                 UICommand::SetInterface(_) => {},
                 UICommand::SetLanguage(_) => {},
-                UICommand::SetUsername(_) => {},
+                UICommand::SetUsername(username) => ui::commands::set_username(
+                    username,
+                    &mut event_loop,
+                    &net_tx,
+                ),
             }
 
             event_loop.refresh();
