@@ -30,8 +30,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                             true => interface.description.to_owned(),
                             false => interface.name.to_owned(),
                         };
-                        let mac =
-                            interface.mac.expect("All interfaces by contract must have MAC. Maybe, MAC dropped while menu was opening.");
+                        let mac = interface.mac.unwrap_or_default();
 
                         const MAC_ALIGN: usize = 17;
                         const NAME_ALIGN: usize = 53;
@@ -59,13 +58,13 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                                     ui_tx.clone(),
                                     MAIN_WINDOW_INITIALIZED,
                                 )
-                            }
+                            },
                             Err(err) => {
                                 ui::dialog::error::show_try_again(
                                     siv,
                                     err.to_string(),
                                 );
-                            }
+                            },
                         }
                     }),
             )
