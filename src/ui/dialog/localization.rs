@@ -1,3 +1,4 @@
+use crate::config::CONFIG;
 use crate::ui;
 use crate::ui::commands;
 use crossbeam::channel::Sender;
@@ -7,6 +8,15 @@ use cursive::{traits::Resizable, views::Dialog, Cursive};
 pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
     let locales = rust_i18n::available_locales!();
 
+    let preferred_language_index: usize = CONFIG
+        .try_lock()
+        .ok()
+        .and_then(|locked_config| locked_config.language.clone())
+        .and_then(|config_lang| {
+            locales.iter().position(|lang| lang.eq(&config_lang))
+        })
+        .unwrap_or_default();
+
     siv.add_layer(
         Dialog::new()
             .title(t!("title.language_selection"))
@@ -15,6 +25,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<commands::UI>) {
                     .with_all(locales.into_iter().map(|language| {
                         (language.to_string(), language.to_owned())
                     }))
+                    .selected(preferred_language_index)
                     .on_submit(move |siv, language_name_id: &String| {
                         let result = ui_tx.try_send(commands::UI::SetLanguage(
                             language_name_id.to_string(),

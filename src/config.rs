@@ -14,8 +14,9 @@ const CONFIG_FILENAME: &str = "config.toml";
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Config {
-    pub username: Option<String>,
     pub interface_name: Option<String>,
+    pub language: Option<String>,
+    pub username: Option<String>,
 }
 
 impl Config {
