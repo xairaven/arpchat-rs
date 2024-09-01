@@ -1,4 +1,5 @@
 use crate::error::config::ConfigError;
+use crate::ui;
 use directories::ProjectDirs;
 use rust_i18n::once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
@@ -67,7 +68,7 @@ impl Config {
 /// Getting username from config.
 /// If there's no username in config, using system hostname.
 pub fn get_username() -> String {
-    CONFIG
+    let username = CONFIG
         .try_lock()
         .ok()
         .and_then(|locked_config| locked_config.username.clone())
@@ -79,5 +80,9 @@ pub fn get_username() -> String {
                 .next()
                 .unwrap_or("")
                 .to_string()
-        })
+        });
+
+    let username = ui::dialog::username::normalize_username(&username);
+
+    username
 }
