@@ -23,7 +23,13 @@ pub fn start() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
                 UICommand::SendMessage(_) => {},
-                UICommand::SetInterface(_) => {},
+                UICommand::SetInterface(interface_name) => {
+                    ui::commands::set_interface(
+                        interface_name,
+                        &mut event_loop,
+                        &net_tx,
+                    )
+                },
                 UICommand::SetLanguage(language) => {
                     ui::commands::set_language(language)
                 },
