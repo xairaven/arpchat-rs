@@ -10,7 +10,7 @@ pub fn show_try_again(siv: &mut Cursive, err: impl fmt::Display) {
             .button(t!("button.try_again"), |siv| {
                 siv.pop_layer();
             })
-            .button(t!("button.quit"), |siv| ui::core::quit(siv)),
+            .button(t!("button.quit"), ui::core::quit),
     );
 }
 
@@ -21,6 +21,6 @@ pub fn show(siv: &mut Cursive, err: impl fmt::Display) {
             .button(t!("button.ok"), |siv| {
                 siv.pop_layer();
             })
-            .button(t!("button.quit"), |siv| ui::core::quit(siv)),
+            .button(t!("button.quit"), ui::core::quit),
     );
 }

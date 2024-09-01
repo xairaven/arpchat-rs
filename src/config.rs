@@ -84,7 +84,5 @@ pub fn get_username() -> String {
                 .to_string()
         });
 
-    let username = ui::dialog::username::normalize_username(&username);
-
-    username
+    ui::dialog::username::normalize_username(&username)
 }

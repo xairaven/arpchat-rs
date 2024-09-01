@@ -68,7 +68,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                         }
                     }),
             )
-            .button(t!("button.quit"), |siv| ui::core::quit(siv))
+            .button(t!("button.quit"), ui::core::quit)
             .min_width(72),
     );
 }

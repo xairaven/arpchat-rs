@@ -12,7 +12,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     let preferred_ether_type_index = CONFIG
         .try_lock()
         .ok()
-        .and_then(|locked_config| locked_config.ether_type.clone())
+        .and_then(|locked_config| locked_config.ether_type)
         .and_then(|config_ether_type| {
             EtherType::iter().position(|ether_type| {
                 ether_type.to_string().eq(&config_ether_type.to_string())
@@ -31,7 +31,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                             .with_all(EtherType::iter().map(|ether_type| {
                                 let name = &ether_type.to_string();
 
-                                (format!("{name}"), ether_type)
+                                (name.to_string(), ether_type)
                             }))
                             .selected(preferred_ether_type_index)
                             .on_submit(move |siv, ether_type: &EtherType| {

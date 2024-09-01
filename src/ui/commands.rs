@@ -17,7 +17,7 @@ pub enum UICommand {
 pub fn set_ether_type(
     ether_type: EtherType, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
 ) {
-    let result = net_tx.try_send(NetCommand::SetEtherType(ether_type.clone()));
+    let result = net_tx.try_send(NetCommand::SetEtherType(ether_type));
 
     if let Err(err) = result {
         ui::dialog::error::show_try_again(siv, err.to_string());

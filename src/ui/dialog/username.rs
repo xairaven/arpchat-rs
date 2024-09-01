@@ -63,7 +63,7 @@ pub fn show_input_dialog(
             siv.pop_layer();
         })
     } else {
-        dialog.button(t!("button.quit"), |siv| ui::core::quit(siv))
+        dialog.button(t!("button.quit"), ui::core::quit)
     }
     .min_width(72);
 
@@ -74,7 +74,7 @@ pub fn normalize_username(username: &str) -> String {
     let mut result = username.to_string();
 
     if username.len() > MAX_USERNAME_LENGTH {
-        result = (&username[..25]).to_string();
+        result = username[..25].to_string();
     }
 
     if username.len() < MIN_USERNAME_LENGTH {
