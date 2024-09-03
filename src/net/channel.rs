@@ -1,3 +1,4 @@
+use crate::error::net::NetError;
 use crate::net::ether_type::EtherType;
 use crate::net::ktp;
 use pnet::datalink::{DataLinkReceiver, DataLinkSender, NetworkInterface};
@@ -16,5 +17,13 @@ pub struct Channel {
 }
 
 impl Channel {
-    fn from_interface(interface: NetworkInterface) {}
+    pub fn from_interface(
+        interface: NetworkInterface,
+    ) -> Result<Self, NetError> {
+        todo!()
+    }
+
+    pub fn set_ether_type(&mut self, ether_type: EtherType) {
+        self.ether_type = ether_type;
+    }
 }
