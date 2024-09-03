@@ -1,14 +1,20 @@
 use crate::config::CONFIG;
 use crate::net::commands::NetCommand;
-use crate::ui;
 use crate::ui::commands::UICommand;
 use crate::ui::dialog;
+use crate::{net, ui};
 use crossbeam::channel::unbounded;
 use cursive::Cursive;
+use std::thread;
 
 pub fn start() {
     let (ui_tx, ui_rx) = unbounded::<UICommand>();
     let (net_tx, net_rx) = unbounded::<NetCommand>();
+
+    let net_thread = thread::spawn({
+        let ui_tx = ui_tx.clone();
+        move || net::core::start(ui_tx, net_rx)
+    });
 
     let mut siv = cursive::default();
     siv.load_toml(include_str!("../../assets/styles.toml"))
@@ -22,6 +28,9 @@ pub fn start() {
     while event_loop.is_running() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
+                UICommand::NetError(err) => {
+                    dialog::error::show_try_again(&mut event_loop, err);
+                },
                 UICommand::SendMessage(_) => {},
                 UICommand::SetEtherType(ether_type) => {
                     ui::commands::set_ether_type(
@@ -52,6 +61,9 @@ pub fn start() {
 
         event_loop.step();
     }
+
+    net_tx.try_send(NetCommand::Terminate).unwrap();
+    net_thread.join().expect("Failed to join net thread");
 }
 
 pub fn quit(siv: &mut Cursive) {
