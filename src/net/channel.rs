@@ -1,5 +1,5 @@
-use crate::net::arp;
 use crate::net::ether_type::EtherType;
+use crate::net::ktp;
 use pnet::datalink::{DataLinkReceiver, DataLinkSender, NetworkInterface};
 use pnet::util::MacAddr;
 use std::collections::{HashMap, VecDeque};
@@ -10,9 +10,9 @@ pub struct Channel {
     tx: Box<dyn DataLinkSender>,
     rx: Box<dyn DataLinkReceiver>,
 
-    buffer: HashMap<arp::Id, Vec<Vec<u8>>>,
+    buffer: HashMap<ktp::Id, Vec<Vec<u8>>>,
 
-    recent: VecDeque<arp::Id>,
+    recent: VecDeque<ktp::Id>,
 }
 
 impl Channel {
