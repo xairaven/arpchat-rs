@@ -1,4 +1,5 @@
 use crate::config::CONFIG;
+use crate::error::net::NetError;
 use crate::net::commands::NetCommand;
 use crate::net::ether_type::EtherType;
 use crate::{config, ui};
@@ -6,6 +7,8 @@ use crossbeam::channel::Sender;
 use cursive::Cursive;
 
 pub enum UICommand {
+    NetError(NetError),
+
     SendMessage(String),
 
     SetEtherType(EtherType),
