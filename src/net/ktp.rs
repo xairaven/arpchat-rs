@@ -55,8 +55,7 @@ impl Packet {
         match tag {
             0 => {
                 let id: Id = data[..size_of::<Id>()].try_into().ok()?;
-                let raw_str =
-                    smaz::decompress(&data[size_of::<Id>()..]).ok()?;
+                let raw_str = smaz::decompress(&data[size_of::<Id>()..]).ok()?;
                 let str = String::from_utf8(raw_str).ok()?;
                 Some(Packet::Message(id, str))
             },
@@ -64,9 +63,7 @@ impl Packet {
             2 => {
                 let id: Id = data[..size_of::<Id>()].try_into().ok()?;
                 let is_join = data[size_of::<Id>()] > 0;
-                let str =
-                    String::from_utf8(data[size_of::<Id>() + 1..].to_vec())
-                        .ok()?;
+                let str = String::from_utf8(data[size_of::<Id>() + 1..].to_vec()).ok()?;
                 Some(Packet::Presence(id, is_join, str))
             },
             3 => Some(Packet::Disconnect(data.try_into().ok()?)),

@@ -36,8 +36,7 @@ pub fn set_ether_type(
 pub fn set_interface(
     interface_name: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
 ) {
-    let result =
-        net_tx.try_send(NetCommand::SetInterface(interface_name.clone()));
+    let result = net_tx.try_send(NetCommand::SetInterface(interface_name.clone()));
 
     if let Err(err) = result {
         ui::dialog::error::show_try_again(siv, err.to_string());
@@ -59,9 +58,7 @@ pub fn set_language(language: String) {
     }
 }
 
-pub fn set_username(
-    username: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
-) {
+pub fn set_username(username: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>) {
     let old_username = config::get_username();
     if old_username.eq(&username) {
         return;

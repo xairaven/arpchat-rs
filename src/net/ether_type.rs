@@ -7,16 +7,7 @@ use strum_macros::{Display, EnumIter};
 /// 88B5 -> IEEE Std 802 - Local Experimental Ethertype <br>
 /// 88B6 -> IEEE Std 802 - Local Experimental Ethertype
 #[derive(
-    Default,
-    Display,
-    EnumIter,
-    Serialize,
-    Deserialize,
-    Copy,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
+    Default, Display, EnumIter, Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq,
 )]
 pub enum EtherType {
     #[strum(serialize = "Experimental1: 0x88B5")]

@@ -22,9 +22,8 @@ pub fn show_input_dialog(
                     move |siv, username| {
                         let username = normalize_username(username);
 
-                        let result = ui_tx.try_send(UICommand::SetUsername(
-                            username.to_owned(),
-                        ));
+                        let result =
+                            ui_tx.try_send(UICommand::SetUsername(username.to_owned()));
 
                         process_operation_result(
                             siv,
@@ -45,15 +44,9 @@ pub fn show_input_dialog(
                 .unwrap();
             let username = normalize_username(username.as_str());
 
-            let result =
-                ui_tx.try_send(UICommand::SetUsername(username.to_string()));
+            let result = ui_tx.try_send(UICommand::SetUsername(username.to_string()));
 
-            process_operation_result(
-                siv,
-                main_initialized,
-                ui_tx.clone(),
-                result,
-            );
+            process_operation_result(siv, main_initialized, ui_tx.clone(), result);
         });
 
     // If window is initialized, "Close/quit button" will close dialog.

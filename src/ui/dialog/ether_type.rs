@@ -35,10 +35,9 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                             }))
                             .selected(preferred_ether_type_index)
                             .on_submit(move |siv, ether_type: &EtherType| {
-                                let result =
-                                    ui_tx.try_send(UICommand::SetEtherType(
-                                        ether_type.to_owned(),
-                                    ));
+                                let result = ui_tx.try_send(UICommand::SetEtherType(
+                                    ether_type.to_owned(),
+                                ));
 
                                 match result {
                                     Ok(_) => {

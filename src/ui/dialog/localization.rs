@@ -12,9 +12,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
         .try_lock()
         .ok()
         .and_then(|locked_config| locked_config.language.clone())
-        .and_then(|config_lang| {
-            locales.iter().position(|lang| lang.eq(&config_lang))
-        })
+        .and_then(|config_lang| locales.iter().position(|lang| lang.eq(&config_lang)))
         .unwrap_or_default();
 
     siv.add_layer(
@@ -22,14 +20,15 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
             .title(t!("title.language_selection"))
             .content(
                 SelectView::new()
-                    .with_all(locales.into_iter().map(|language| {
-                        (language.to_string(), language.to_owned())
-                    }))
+                    .with_all(
+                        locales
+                            .into_iter()
+                            .map(|language| (language.to_string(), language.to_owned())),
+                    )
                     .selected(preferred_language_index)
                     .on_submit(move |siv, language: &String| {
-                        let result = ui_tx.try_send(UICommand::SetLanguage(
-                            language.to_string(),
-                        ));
+                        let result =
+                            ui_tx.try_send(UICommand::SetLanguage(language.to_string()));
 
                         match result {
                             Ok(_) => {
@@ -40,10 +39,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                                 );
                             },
                             Err(err) => {
-                                ui::dialog::error::show_try_again(
-                                    siv,
-                                    err.to_string(),
-                                );
+                                ui::dialog::error::show_try_again(siv, err.to_string());
                             },
                         }
                     }),

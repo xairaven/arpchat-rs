@@ -10,8 +10,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     let mut channel: Option<Channel> = None;
 
     loop {
-        if let Ok(NetCommand::SetInterface(interface_name)) = net_rx.try_recv()
-        {
+        if let Ok(NetCommand::SetInterface(interface_name)) = net_rx.try_recv() {
             let result = channel_from_interface_name(interface_name);
             if let Err(err) = result {
                 send_net_error_to_ui(&ui_tx, err);
@@ -45,9 +44,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     }
 }
 
-fn channel_from_interface_name(
-    interface_name: String,
-) -> Result<Channel, NetError> {
+fn channel_from_interface_name(interface_name: String) -> Result<Channel, NetError> {
     let interface = interface::usable_sorted()
         .into_iter()
         .find(|interface| interface.name.eq(&interface_name))

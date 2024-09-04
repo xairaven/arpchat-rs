@@ -36,10 +36,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                         const NAME_ALIGN: usize = 53;
 
                         (
-                            format!(
-                                "{:<NAME_ALIGN$}[{:>MAC_ALIGN$}]",
-                                name_id, mac
-                            ),
+                            format!("{:<NAME_ALIGN$}[{:>MAC_ALIGN$}]", name_id, mac),
                             interface.name.to_owned(),
                         )
                     }))
@@ -60,10 +57,7 @@ pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                                 )
                             },
                             Err(err) => {
-                                ui::dialog::error::show_try_again(
-                                    siv,
-                                    err.to_string(),
-                                );
+                                ui::dialog::error::show_try_again(siv, err.to_string());
                             },
                         }
                     }),

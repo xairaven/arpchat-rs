@@ -10,8 +10,7 @@ use std::string::ToString;
 use std::sync::Mutex;
 use std::{env, fs};
 
-pub static CONFIG: Lazy<Mutex<Config>> =
-    Lazy::new(|| Mutex::new(Config::load()));
+pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::load()));
 const CONFIG_FILENAME: &str = "config.toml";
 
 #[derive(Serialize, Deserialize, Default)]
@@ -40,9 +39,8 @@ impl Config {
 
         let path = Self::get_config_path()?;
         if let Some(parent_path) = path.parent() {
-            fs::create_dir_all(parent_path).map_err(|err| {
-                ConfigError::CannotRecreatePath(err.to_string())
-            })?;
+            fs::create_dir_all(parent_path)
+                .map_err(|err| ConfigError::CannotRecreatePath(err.to_string()))?;
         }
         fs::write(path, data)
             .map_err(|err| ConfigError::CannotCreateFile(err.to_string()))?;
@@ -59,9 +57,8 @@ impl Config {
     }
 
     fn get_current_directory() -> Result<PathBuf, ConfigError> {
-        let mut current_dir = env::current_dir().map_err(|err| {
-            ConfigError::CurrentDirFetchFailed(err.to_string())
-        })?;
+        let mut current_dir = env::current_dir()
+            .map_err(|err| ConfigError::CurrentDirFetchFailed(err.to_string()))?;
         current_dir.push(CONFIG_FILENAME);
         Ok(current_dir)
     }

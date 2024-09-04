@@ -17,9 +17,7 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn from_interface(
-        interface: NetworkInterface,
-    ) -> Result<Self, NetError> {
+    pub fn from_interface(interface: NetworkInterface) -> Result<Self, NetError> {
         todo!()
     }
 
