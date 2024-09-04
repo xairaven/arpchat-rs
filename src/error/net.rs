@@ -2,6 +2,9 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum NetError {
+    #[error("Error getting channel, might be missing permissions")]
+    ChannelGettingError(#[from] std::io::Error),
+
     #[error("Tried to set interface, but interface is already initialized")]
     InterfaceAlreadySet,
 
@@ -10,4 +13,7 @@ pub enum NetError {
 
     #[error("No MAC Address.")]
     NoMac,
+
+    #[error("Unknown channel type, only ethernet is supported")]
+    UnknownChannelType,
 }
