@@ -21,7 +21,7 @@ const PACKET_HEADER_SIZE: usize = PACKET_PREFIX.len()
 const PACKET_DATA_SIZE: usize = (u8::MAX as usize) - PACKET_HEADER_SIZE;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-enum Packet {
+pub enum Packet {
     Message(Id, String),
     PresenceReq,
     Presence(Id, bool, String),
@@ -29,7 +29,7 @@ enum Packet {
 }
 
 impl Packet {
-    fn tag(&self) -> Tag {
+    pub fn tag(&self) -> Tag {
         match self {
             Packet::Message(_, _) => 0,
             Packet::PresenceReq => 1,
@@ -38,7 +38,7 @@ impl Packet {
         }
     }
 
-    fn serialize(&self) -> Vec<u8> {
+    pub fn serialize(&self) -> Vec<u8> {
         match self {
             Packet::Message(id, msg) => {
                 [id as &[u8], &smaz::compress(msg.as_bytes())].concat()
@@ -51,7 +51,7 @@ impl Packet {
         }
     }
 
-    fn deserialize(tag: u8, data: &[u8]) -> Option<Self> {
+    pub fn deserialize(tag: u8, data: &[u8]) -> Option<Self> {
         match tag {
             0 => {
                 let id: Id = data[..size_of::<Id>()].try_into().ok()?;

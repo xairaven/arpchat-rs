@@ -1,6 +1,7 @@
 use crate::error::net::NetError;
 use crate::net::ether_type::EtherType;
 use crate::net::ktp;
+use crate::net::ktp::Packet;
 use pnet::datalink::{DataLinkReceiver, DataLinkSender, NetworkInterface};
 use pnet::util::MacAddr;
 use std::collections::{HashMap, VecDeque};
@@ -23,5 +24,17 @@ impl Channel {
 
     pub fn set_ether_type(&mut self, ether_type: EtherType) {
         self.ether_type = ether_type;
+    }
+
+    pub fn try_send(&self, packet: Packet) -> Result<(), NetError> {
+        todo!()
+    }
+
+    fn try_send_part() -> Result<(), NetError> {
+        todo!()
+    }
+
+    pub fn try_recv(&mut self) -> Result<Option<Packet>, NetError> {
+        todo!()
     }
 }
