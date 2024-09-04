@@ -5,6 +5,7 @@ pub mod ui;
 
 #[macro_use]
 extern crate rust_i18n;
+extern crate core;
 
 // Defining folder with locales. Path: crate-root/locales
 rust_i18n::i18n!("locales", fallback = "English");
