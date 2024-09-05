@@ -2,12 +2,15 @@ use crate::config::CONFIG;
 use crate::error::net::NetError;
 use crate::net::channel::Channel;
 use crate::net::commands::NetCommand;
-use crate::net::interface;
-use crate::net::ktp;
+use crate::net::ktp::Packet;
+use crate::net::{interface, ktp};
 use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
 
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
+    // ???
+    let local_username = "".to_string();
+
     let mut channel: Option<Channel> = None;
 
     loop {
@@ -26,7 +29,20 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
         match net_rx.try_recv() {
             Ok(NetCommand::SendMessage { message_text }) => {
-                // TODO: SendMessage
+                let local_id = ktp::generate_id();
+
+                ui_tx
+                    .try_send(UICommand::ShowMessage {
+                        id: local_id,
+                        username: local_username.clone(),
+                        message: message_text.clone(),
+                    })
+                    .unwrap();
+
+                let result = channel.try_send(Packet::Message(local_id, message_text));
+                if let Err(err) = result {
+                    send_net_error_to_ui(&ui_tx, err);
+                }
             },
             Ok(NetCommand::SetInterface { .. }) => {
                 send_net_error_to_ui(&ui_tx, NetError::InterfaceAlreadySet)
@@ -62,10 +78,6 @@ fn channel_from_interface_name(interface_name: String) -> Result<Channel, NetErr
     }
 
     Ok(channel)
-}
-
-fn generate_id() -> ktp::Id {
-    rand::random()
 }
 
 fn send_net_error_to_ui(ui_tx: &Sender<UICommand>, err: NetError) {

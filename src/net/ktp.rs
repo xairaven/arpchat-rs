@@ -56,3 +56,7 @@ impl Packet {
         }
     }
 }
+
+pub fn generate_id() -> Id {
+    rand::random()
+}
