@@ -8,6 +8,8 @@ use crossbeam::channel::Sender;
 use cursive::Cursive;
 
 pub enum UICommand {
+    AlertUser,
+
     SendNetError(NetError),
 
     SendMessage {
@@ -24,6 +26,13 @@ pub enum UICommand {
         username: String,
         message: String,
     },
+}
+
+pub fn alert_user() {
+    // Ringing dat bell
+    use std::io::{stdout, Write};
+    print!("\x07");
+    let _ = stdout().flush();
 }
 
 pub fn set_ether_type(

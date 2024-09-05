@@ -28,6 +28,7 @@ pub fn start() {
     while event_loop.is_running() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
+                UICommand::AlertUser => ui::commands::alert_user(),
                 UICommand::SendNetError(err) => {
                     dialog::error::show_try_again(&mut event_loop, err);
                 },
