@@ -8,7 +8,9 @@ use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
 
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
+    let user_id = ktp::generate_id();
     let mut local_username = String::new();
+
     let mut channel: Option<Channel> = None;
 
     loop {
@@ -27,17 +29,15 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
         match net_rx.try_recv() {
             Ok(NetCommand::SendMessage { message_text }) => {
-                let local_id = ktp::generate_id();
-
                 ui_tx
                     .try_send(UICommand::ShowMessage {
-                        id: local_id,
+                        id: user_id,
                         username: local_username.clone(),
                         message: message_text.clone(),
                     })
                     .unwrap();
 
-                let result = channel.try_send(Packet::Message(local_id, message_text));
+                let result = channel.try_send(Packet::Message(user_id, message_text));
                 if let Err(err) = result {
                     send_net_error_to_ui(&ui_tx, err);
                 }
@@ -49,7 +49,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 channel.set_ether_type(ether_type);
             },
             Ok(NetCommand::Terminate) => {
-                let _ = channel.try_send(Packet::Disconnect(ktp::generate_id()));
+                let _ = channel.try_send(Packet::Disconnect(user_id));
                 break;
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
@@ -58,7 +58,30 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
             Err(_) => {},
         }
 
-        // TODO: everything lol
+        let result_recv_packet = channel.try_recv();
+        if let Err(err) = result_recv_packet {
+            send_net_error_to_ui(&ui_tx, err);
+            break;
+        }
+        let packet = result_recv_packet.unwrap();
+        match packet {
+            None => {},
+            Some(Packet::Message(id, message_text)) => {
+                // Alerting user if there's username in message
+                if id != user_id && message_text.contains(&local_username) {
+                    let _ = ui_tx.try_send(UICommand::AlertUser);
+                }
+
+                // TODO: Username related thing
+                ui_tx.try_send(UICommand::ShowMessage {id, username: "IDK".to_string(), message })
+                    .unwrap();
+            },
+            Some(Packet::Disconnect(_)) => {
+                // TODO: Something related with online panel
+            },
+        }
+
+        // TODO: Something related with heartbeat
     }
 }
 
