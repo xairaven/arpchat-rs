@@ -66,9 +66,9 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                                         },
                                     );
 
-                                    let result = ui_tx.try_send(UICommand::SendMessage(
-                                        msg.to_string(),
-                                    ));
+                                    let result = ui_tx.try_send(UICommand::SendMessage {
+                                        message_text: msg.to_string(),
+                                    });
 
                                     if let Err(err) = result {
                                         ui::dialog::error::show_try_again(

@@ -2,19 +2,28 @@ use crate::config::CONFIG;
 use crate::error::net::NetError;
 use crate::net::commands::NetCommand;
 use crate::net::ether_type::EtherType;
+use crate::net::ktp;
 use crate::{config, ui};
 use crossbeam::channel::Sender;
 use cursive::Cursive;
 
 pub enum UICommand {
-    NetError(NetError),
+    SendNetError(NetError),
 
-    SendMessage(String),
+    SendMessage {
+        message_text: String,
+    },
 
     SetEtherType(EtherType),
     SetInterface(String),
     SetLanguage(String),
     SetUsername(String),
+
+    ShowMessage {
+        id: ktp::Id,
+        username: String,
+        message: String,
+    },
 }
 
 pub fn set_ether_type(
@@ -36,7 +45,9 @@ pub fn set_ether_type(
 pub fn set_interface(
     interface_name: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
 ) {
-    let result = net_tx.try_send(NetCommand::SetInterface(interface_name.clone()));
+    let result = net_tx.try_send(NetCommand::SetInterface {
+        interface_name: interface_name.clone(),
+    });
 
     if let Err(err) = result {
         ui::dialog::error::show_try_again(siv, err.to_string());

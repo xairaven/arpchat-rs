@@ -28,10 +28,12 @@ pub fn start() {
     while event_loop.is_running() {
         while let Ok(command) = ui_rx.try_recv() {
             match command {
-                UICommand::NetError(err) => {
+                UICommand::SendNetError(err) => {
                     dialog::error::show_try_again(&mut event_loop, err);
                 },
-                UICommand::SendMessage(_) => {},
+                UICommand::SendMessage { message_text } => {
+                    // TODO: Call net command
+                },
                 UICommand::SetEtherType(ether_type) => {
                     ui::commands::set_ether_type(ether_type, &mut event_loop, &net_tx);
                 },
@@ -43,6 +45,13 @@ pub fn start() {
                 },
                 UICommand::SetUsername(username) => {
                     ui::commands::set_username(username, &mut event_loop, &net_tx)
+                },
+                UICommand::ShowMessage {
+                    id,
+                    username,
+                    message,
+                } => {
+                    // TODO: Show message
                 },
             }
 
