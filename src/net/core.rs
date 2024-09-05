@@ -8,9 +8,7 @@ use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
 
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
-    // ???
-    let local_username = "".to_string();
-
+    let mut local_username = String::new();
     let mut channel: Option<Channel> = None;
 
     loop {
@@ -55,7 +53,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 break;
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
-                // TODO: update username
+                local_username = new_username;
             },
             Err(_) => {},
         }
