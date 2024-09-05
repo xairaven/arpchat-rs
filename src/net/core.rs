@@ -49,7 +49,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 channel.set_ether_type(ether_type);
             },
             Ok(NetCommand::Terminate) => {
-                // TODO: send disconnect package
+                let _ = channel.try_send(Packet::Disconnect(ktp::generate_id()));
                 break;
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
