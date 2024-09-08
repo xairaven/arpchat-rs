@@ -45,6 +45,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         let mut channel = channel.take().unwrap();
 
         match net_rx.try_recv() {
+            Ok(NetCommand::PauseHeartbeat(pause)) => pause_heartbeat = pause,
             Ok(NetCommand::SendMessage { message_text }) => {
                 ui_tx
                     .try_send(UICommand::ShowMessage {
@@ -77,7 +78,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 // TODO: idk
                 if state == NetThreadState::NeedsUsername {
                     // ..
-                    state = NetThreadState::NeedsInitialPresence;
+                    state = NeedsInitialPresence;
                 }
             },
             Err(_) => {},
