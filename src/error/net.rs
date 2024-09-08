@@ -8,8 +8,14 @@ pub enum NetError {
     #[error("Couldn't serialize ARP packet")]
     ARPSerializeFailed,
 
+    #[error("Couldn't capture packet")]
+    CaptureFailed,
+
     #[error("Error getting channel, might be missing permissions")]
     ChannelGettingError(#[from] std::io::Error),
+
+    #[error("Couldn't parse frame as Ethernet")]
+    EthernetParseFailed,
 
     #[error("Tried to set interface, but interface is already initialized")]
     InterfaceAlreadySet,

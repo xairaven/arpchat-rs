@@ -2,10 +2,11 @@ use crate::error::net::NetError;
 use crate::net::ether_type::EtherType;
 use crate::net::{arp, ktp};
 use pnet::datalink::{DataLinkReceiver, DataLinkSender, NetworkInterface};
-use pnet::packet::ethernet::{EtherTypes, MutableEthernetPacket};
+use pnet::packet::ethernet::{EtherTypes, EthernetPacket, MutableEthernetPacket};
 use pnet::packet::Packet;
 use pnet::util::MacAddr;
 use std::collections::{HashMap, VecDeque};
+use std::io::ErrorKind;
 use std::time::Duration;
 
 pub struct Channel {
@@ -114,6 +115,42 @@ impl Channel {
     }
 
     pub fn try_recv(&mut self) -> Result<Option<ktp::Packet>, NetError> {
-        todo!()
+        let packet = match self.rx.next() {
+            Ok(packet) => packet,
+            Err(e) => {
+                return if e.kind() == ErrorKind::TimedOut {
+                    Ok(None)
+                } else {
+                    Err(NetError::CaptureFailed)
+                }
+            },
+        };
+        let packet = match EthernetPacket::new(packet) {
+            Some(packet) => packet,
+            None => return Ok(None),
+        };
+
+        // Early filter for packets that aren't relevant.
+        if packet.get_ethertype() != EtherTypes::Arp
+            || &packet.payload()[6..8] != arp::OPCODE_REQUEST
+            || &packet.payload()[..2] != arp::HARDWARE_TYPE_ETHERNET
+            || packet.payload()[4] != arp::HARDWARE_ADDRESS_LENGTH
+        {
+            return Ok(None);
+        }
+
+        let data_len = packet.payload()[5] as usize;
+        let data = &packet.payload()[14..14 + data_len];
+        if !data.starts_with(ktp::PACKET_PREFIX) {
+            return Ok(None);
+        }
+
+        if let &[tag, seq, total, ref inner @ ..] = &data[ktp::PACKET_PREFIX.len()..] {
+            // TODO: Deserializing...
+
+            todo!()
+        } else {
+            Ok(None)
+        }
     }
 }
