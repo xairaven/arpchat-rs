@@ -3,7 +3,9 @@ use crate::net::channel::Channel;
 use crate::net::commands::NetCommand;
 use crate::net::core::NetThreadState::NeedsInitialPresence;
 use crate::net::ktp::Packet;
-use crate::net::presence::UpdatePresenceKind;
+use crate::net::presence::{
+    UpdatePresenceKind, HEARTBEAT_INTERVAL, INACTIVE_TIMEOUT, OFFLINE_TIMEOUT,
+};
 use crate::net::{interface, ktp};
 use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
@@ -19,7 +21,7 @@ enum NetThreadState {
 
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     let session_id = ktp::generate_id();
-    let mut local_username = String::new();
+    let mut session_username = String::new();
 
     let mut last_heartbeat = Instant::now();
     let mut online: HashMap<ktp::Id, (Instant, String)> = HashMap::new();
@@ -50,7 +52,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 ui_tx
                     .try_send(UICommand::ShowMessage {
                         id: session_id,
-                        username: local_username.clone(),
+                        username: session_username.clone(),
                         message: message_text.clone(),
                     })
                     .unwrap();
@@ -74,7 +76,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 break;
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
-                local_username = new_username;
+                session_username = new_username;
                 // TODO: idk
                 if state == NetThreadState::NeedsUsername {
                     // ..
@@ -99,7 +101,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 };
 
                 // Alerting user if there's username in message
-                if id != session_id && message_text.contains(&local_username) {
+                if id != session_id && message_text.contains(&session_username) {
                     let _ = ui_tx.try_send(UICommand::AlertUser);
                 }
 
@@ -116,7 +118,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 let packet = Packet::PresenceInformation {
                     id: session_id,
                     is_join: is_user_joining,
-                    username: local_username.clone(),
+                    username: session_username.clone(),
                 };
 
                 channel.try_send(packet).unwrap();
@@ -167,7 +169,47 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
             },
         }
 
-        // TODO: Something related with heartbeat
+        if last_heartbeat.elapsed() > HEARTBEAT_INTERVAL && state == NetThreadState::Ready
+        {
+            if !pause_heartbeat {
+                channel
+                    .try_send(Packet::PresenceInformation {
+                        id: session_id,
+                        is_join: false,
+                        username: session_username.clone(),
+                    })
+                    .unwrap();
+            }
+
+            let mut to_remove = vec![];
+            for (id, (user_last_heartbeat, username)) in online.iter() {
+                if user_last_heartbeat.elapsed() > OFFLINE_TIMEOUT {
+                    offline.insert(*id);
+                    ui_tx
+                        .try_send(UICommand::RemovePresence {
+                            id: *id,
+                            username: username.clone(),
+                        })
+                        .unwrap();
+                    to_remove.push(*id);
+                } else if last_heartbeat.elapsed() > INACTIVE_TIMEOUT {
+                    ui_tx
+                        .try_send(UICommand::PresenceUpdate {
+                            id: *id,
+                            username: username.clone(),
+                            is_inactive: true,
+                            kind: UpdatePresenceKind::Boring,
+                        })
+                        .unwrap();
+                }
+            }
+
+            for id in to_remove {
+                online.remove(&id);
+            }
+
+            last_heartbeat = Instant::now();
+        }
     }
 }
 
