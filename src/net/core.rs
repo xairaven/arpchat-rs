@@ -6,10 +6,31 @@ use crate::net::ktp::Packet;
 use crate::net::{interface, ktp};
 use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
+use std::collections::{HashMap, HashSet};
+use std::time::{Duration, Instant};
+use crate::net::core::NetThreadState::NeedsInitialPresence;
+
+const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(3);
+const INACTIVE_TIMEOUT: Duration = Duration::from_secs(6);
+const OFFLINE_TIMEOUT: Duration = Duration::from_secs(12);
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+enum NetThreadState {
+    NeedsUsername,
+    NeedsInitialPresence,
+    Ready,
+}
 
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     let user_id = ktp::generate_id();
     let mut local_username = String::new();
+
+    let mut last_heartbeat = Instant::now();
+    let mut online: HashMap<ktp::Id, (Instant, String)> = HashMap::new();
+    let mut offline: HashSet<ktp::Id> = HashSet::new();
+
+    let mut state = NetThreadState::NeedsUsername;
+    let mut pause_heartbeat = false;
 
     let mut channel: Option<Channel> = None;
 
@@ -37,25 +58,30 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     })
                     .unwrap();
 
-                let result = channel.try_send(Packet::Message(user_id, message_text));
+                let result = channel.try_send(Packet::Message { id: user_id, message_text });
                 if let Err(err) = result {
                     send_net_error_to_ui(&ui_tx, err);
                 }
-            },
+            }
             Ok(NetCommand::SetInterface { .. }) => {
                 send_net_error_to_ui(&ui_tx, NetError::InterfaceAlreadySet)
-            },
+            }
             Ok(NetCommand::SetEtherType(ether_type)) => {
                 channel.set_ether_type(ether_type);
-            },
+            }
             Ok(NetCommand::Terminate) => {
                 let _ = channel.try_send(Packet::Disconnect(user_id));
                 break;
-            },
+            }
             Ok(NetCommand::UpdateUsername(new_username)) => {
                 local_username = new_username;
-            },
-            Err(_) => {},
+                // TODO: idk
+                if state == NetThreadState::NeedsUsername {
+                    // ..
+                    state = NetThreadState::NeedsInitialPresence;
+                }
+            }
+            Err(_) => {}
         }
 
         let result_recv_packet = channel.try_recv();
@@ -65,16 +91,34 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         }
         let packet = result_recv_packet.unwrap();
         match packet {
-            None => {},
-            Some(Packet::Message(id, message_text)) => {
+            None => {}
+            Some(Packet::Message { id, message_text }) => {
                 // Alerting user if there's username in message
                 if id != user_id && message_text.contains(&local_username) {
                     let _ = ui_tx.try_send(UICommand::AlertUser);
                 }
 
                 // TODO: Username related thing
-                ui_tx.try_send(UICommand::ShowMessage {id, username: "IDK".to_string(), message })
+                ui_tx
+                    .try_send(UICommand::ShowMessage {
+                        id,
+                        username: "IDK".to_string(),
+                        message: message_text,
+                    })
                     .unwrap();
+            }
+            Some(Packet::PresenceBroadcastRequest) => {
+                let is_user_joining = state == NeedsInitialPresence;
+                let packet = Packet::PresenceInformation {
+                    id: user_id,
+                    is_join: is_user_joining,
+                    username: local_username.clone(),
+                };
+
+                channel.try_send(packet).unwrap();
+            },
+            Some(Packet::PresenceInformation { id, is_join, username }) => {
+                // TODO: Update online info
             },
             Some(Packet::Disconnect(_)) => {
                 // TODO: Something related with online panel
@@ -108,10 +152,10 @@ fn send_net_error_to_ui(ui_tx: &Sender<UICommand>, err: NetError) {
         match err {
             TrySendError::Full(_) => {
                 // Channel can't be full, because it is unbounded
-            },
+            }
             TrySendError::Disconnected(_) => {
                 panic!("Channel disconnected.")
-            },
+            }
         }
     }
 }
