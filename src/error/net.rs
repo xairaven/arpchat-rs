@@ -11,6 +11,9 @@ pub enum NetError {
     #[error("Invalid interface {0}")]
     InvalidInterface(String),
 
+    #[error("Message too long to send.")]
+    MessageTooLong,
+
     #[error("No MAC Address.")]
     NoMac,
 

@@ -1,7 +1,7 @@
 use crate::error::net::NetError;
 use crate::net::ether_type::EtherType;
 use crate::net::ktp;
-use crate::net::ktp::Packet;
+use crate::net::ktp::{Id, Packet, Seq, Total};
 use pnet::datalink::{DataLinkReceiver, DataLinkSender, NetworkInterface};
 use pnet::util::MacAddr;
 use std::collections::{HashMap, VecDeque};
@@ -47,7 +47,22 @@ impl Channel {
     }
 
     pub fn try_send(&self, packet: Packet) -> Result<(), NetError> {
-        todo!()
+        let data = packet.serialize();
+        let parts = data.chunks(ktp::PACKET_DATA_SIZE).collect();
+
+        // Possible bug: need to push .
+
+        if parts.len() - 1 > u8::MAX as usize {
+            return Err(NetError::MessageTooLong);
+        }
+
+        let total: Total = parts.len() - 1;
+        let id: Id = ktp::generate_id();
+        for (seq, part) in parts.into_iter().enumerate() {
+            self.send_part(packet.tag(), seq as Seq, total as Total, id as Id, part)?;
+        }
+
+        Ok(())
     }
 
     fn try_send_part() -> Result<(), NetError> {
