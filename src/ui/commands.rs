@@ -3,6 +3,7 @@ use crate::error::net::NetError;
 use crate::net::commands::NetCommand;
 use crate::net::ether_type::EtherType;
 use crate::net::ktp;
+use crate::net::presence::UpdatePresenceKind;
 use crate::{config, ui};
 use crossbeam::channel::Sender;
 use cursive::Cursive;
@@ -25,6 +26,18 @@ pub enum UICommand {
         id: ktp::Id,
         username: String,
         message: String,
+    },
+
+    PresenceUpdate {
+        id: ktp::Id,
+        username: String,
+        is_online: bool,
+        kind: UpdatePresenceKind,
+    },
+
+    RemovePresence {
+        id: ktp::Id,
+        username: String,
     },
 }
 

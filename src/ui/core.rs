@@ -54,6 +54,17 @@ pub fn start() {
                 } => {
                     // TODO: Show message
                 },
+                UICommand::PresenceUpdate {
+                    id,
+                    username,
+                    is_online,
+                    kind,
+                } => {
+                    // TODO: ...
+                },
+                UICommand::RemovePresence { id, username } => {
+                    // TODO: ...
+                },
             }
 
             event_loop.refresh();
