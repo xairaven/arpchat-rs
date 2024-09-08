@@ -1,3 +1,6 @@
+use crate::config::CONFIG;
+use crate::error::net::NetError;
+use crate::net::channel::Channel;
 use pnet::datalink::NetworkInterface;
 
 /// Usable interfaces. <br>
@@ -13,4 +16,20 @@ pub fn usable_sorted() -> Vec<NetworkInterface> {
     interfaces.reverse();
 
     interfaces
+}
+
+pub fn channel_from_name(interface_name: String) -> Result<Channel, NetError> {
+    let interface = usable_sorted()
+        .into_iter()
+        .find(|interface| interface.name.eq(&interface_name))
+        .ok_or(NetError::InvalidInterface(interface_name))?;
+
+    let mut channel = Channel::from_interface(interface)?;
+    if let Ok(config) = CONFIG.try_lock() {
+        if let Some(ether_type) = config.ether_type {
+            channel.set_ether_type(ether_type);
+        }
+    }
+
+    Ok(channel)
 }

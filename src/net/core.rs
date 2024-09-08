@@ -1,4 +1,3 @@
-use crate::config::CONFIG;
 use crate::error::net::NetError;
 use crate::net::channel::Channel;
 use crate::net::commands::NetCommand;
@@ -33,7 +32,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
     loop {
         if let Ok(NetCommand::SetInterface { interface_name }) = net_rx.try_recv() {
-            let result = channel_from_interface_name(interface_name);
+            let result = interface::channel_from_name(interface_name);
             if let Err(err) = result {
                 send_net_error_to_ui(&ui_tx, err);
                 continue;
@@ -169,22 +168,6 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
         // TODO: Something related with heartbeat
     }
-}
-
-fn channel_from_interface_name(interface_name: String) -> Result<Channel, NetError> {
-    let interface = interface::usable_sorted()
-        .into_iter()
-        .find(|interface| interface.name.eq(&interface_name))
-        .ok_or(NetError::InvalidInterface(interface_name))?;
-
-    let mut channel = Channel::from_interface(interface)?;
-    if let Ok(config) = CONFIG.try_lock() {
-        if let Some(ether_type) = config.ether_type {
-            channel.set_ether_type(ether_type);
-        }
-    }
-
-    Ok(channel)
 }
 
 fn send_net_error_to_ui(ui_tx: &Sender<UICommand>, err: NetError) {
