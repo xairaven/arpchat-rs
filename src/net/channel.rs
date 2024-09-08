@@ -1,8 +1,9 @@
 use crate::error::net::NetError;
 use crate::net::ether_type::EtherType;
-use crate::net::ktp;
-use crate::net::ktp::{Id, Packet, Seq, Total};
+use crate::net::{arp, ktp};
 use pnet::datalink::{DataLinkReceiver, DataLinkSender, NetworkInterface};
+use pnet::packet::ethernet::{EtherTypes, MutableEthernetPacket};
+use pnet::packet::Packet;
 use pnet::util::MacAddr;
 use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
@@ -46,9 +47,9 @@ impl Channel {
         self.ether_type = ether_type;
     }
 
-    pub fn try_send(&self, packet: Packet) -> Result<(), NetError> {
+    pub fn try_send(&mut self, packet: ktp::Packet) -> Result<(), NetError> {
         let data = packet.serialize();
-        let parts = data.chunks(ktp::PACKET_DATA_SIZE).collect();
+        let parts: Vec<&[u8]> = data.chunks(ktp::PACKET_DATA_SIZE).collect();
 
         // Possible bug: need to push .
 
@@ -56,20 +57,63 @@ impl Channel {
             return Err(NetError::MessageTooLong);
         }
 
-        let total: Total = parts.len() - 1;
-        let id: Id = ktp::generate_id();
+        let total = (parts.len() - 1) as ktp::Total;
+        let id: ktp::Id = ktp::generate_id();
         for (seq, part) in parts.into_iter().enumerate() {
-            self.send_part(packet.tag(), seq as Seq, total as Total, id as Id, part)?;
+            self.try_send_part(
+                packet.tag(),
+                seq as ktp::Seq,
+                total as ktp::Total,
+                id as ktp::Id,
+                part,
+            )?;
         }
 
         Ok(())
     }
 
-    fn try_send_part() -> Result<(), NetError> {
-        todo!()
+    fn try_send_part(
+        &mut self, tag: ktp::Tag, seq: ktp::Seq, total: ktp::Total, id: ktp::Id,
+        part: &[u8],
+    ) -> Result<(), NetError> {
+        let data = &[ktp::PACKET_PREFIX, &[tag, seq, total], &id, part].concat();
+
+        // The length of the data must fit in a u8. This should also
+        // guarantee that we'll be inside the MTU.
+        debug_assert!(
+            data.len() <= u8::MAX as usize,
+            "Part data is too large ({} > {})",
+            data.len(),
+            u8::MAX
+        );
+
+        let arp_bytes = [
+            arp::HARDWARE_TYPE_ETHERNET,
+            self.ether_type.bytes(),
+            &[arp::HARDWARE_ADDRESS_LENGTH, data.len() as u8],
+            arp::OPCODE_REQUEST,
+            &self.src_mac.octets(), // Sender hardware address
+            data,                   // Sender protocol address
+            &[0; 6],                // Target hardware address
+            data,                   // Target protocol address
+        ]
+        .concat();
+
+        let mut ethernet_bytes = vec![0; 14 + arp_bytes.len()];
+        let mut ethernet_frame = MutableEthernetPacket::new(&mut ethernet_bytes[..])
+            .ok_or(NetError::ARPSerializeFailed)?;
+        ethernet_frame.set_destination(MacAddr::broadcast());
+        ethernet_frame.set_source(self.src_mac);
+        ethernet_frame.set_ethertype(EtherTypes::Arp);
+        ethernet_frame.set_payload(&arp_bytes);
+
+        match self.tx.send_to(ethernet_frame.packet(), None) {
+            Some(Ok(())) => Ok(()),
+            _ => Err(NetError::ARPSendFailed),
+        }
     }
 
-    pub fn try_recv(&mut self) -> Result<Option<Packet>, NetError> {
+    pub fn try_recv(&mut self) -> Result<Option<ktp::Packet>, NetError> {
         todo!()
     }
 }

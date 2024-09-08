@@ -2,6 +2,12 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum NetError {
+    #[error("Couldn't send ARP packet")]
+    ARPSendFailed,
+
+    #[error("Couldn't serialize ARP packet")]
+    ARPSerializeFailed,
+
     #[error("Error getting channel, might be missing permissions")]
     ChannelGettingError(#[from] std::io::Error),
 
