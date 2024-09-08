@@ -31,7 +31,7 @@ pub enum UICommand {
     PresenceUpdate {
         id: ktp::Id,
         username: String,
-        is_online: bool,
+        is_inactive: bool,
         kind: UpdatePresenceKind,
     },
 

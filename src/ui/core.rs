@@ -57,7 +57,7 @@ pub fn start() {
                 UICommand::PresenceUpdate {
                     id,
                     username,
-                    is_online,
+                    is_inactive,
                     kind,
                 } => {
                     // TODO: ...
