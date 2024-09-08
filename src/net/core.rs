@@ -77,9 +77,9 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
                 session_username = new_username;
-                // TODO: idk
+
                 if state == NetThreadState::NeedsUsername {
-                    // ..
+                    channel.try_send(Packet::PresenceBroadcastRequest).unwrap();
                     state = NeedsInitialPresence;
                 }
             },
