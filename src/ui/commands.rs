@@ -8,7 +8,7 @@ use crate::{config, ui};
 use chrono::Timelike;
 use crossbeam::channel::Sender;
 use cursive::backends::crossterm::crossterm::style::Stylize;
-use cursive::views::{NamedView, TextView};
+use cursive::views::{LinearLayout, NamedView, TextView};
 use cursive::Cursive;
 
 pub enum UICommand {
@@ -193,4 +193,21 @@ pub fn presence_update(
             false => format!("{} {username}", "*".with(ui::colors::from_id(&id))),
         },
     );
+}
+
+pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
+    ui::cursive_extension::append_txt(
+        siv,
+        "chat_inner",
+        format!("> {username} disconnected, bye!")
+            .dark_grey()
+            .to_string(),
+    );
+
+    // Remove from presences list.
+    siv.call_on_name("presences", |presences: &mut LinearLayout| {
+        presences
+            .find_child_from_name(&format!("{id:x?}_presence"))
+            .map(|presence| presences.remove_child(presence));
+    });
 }

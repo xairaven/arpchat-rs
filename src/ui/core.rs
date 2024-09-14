@@ -69,7 +69,7 @@ pub fn start() {
                     );
                 },
                 UICommand::RemovePresence { id, username } => {
-                    // TODO: ...
+                    ui::commands::remove_presence(id, username, &mut event_loop);
                 },
             }
 
