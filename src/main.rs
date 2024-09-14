@@ -19,5 +19,7 @@ fn main() {
         std::process::exit(1);
     });
 
+    log::info!("Logger initialized. Starting UI.");
+
     ui::core::start();
 }
