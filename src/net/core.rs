@@ -48,10 +48,14 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
             log::info!("Net channel created");
         }
+
         if channel.is_none() {
             continue;
         }
-        let mut channel = channel.take().unwrap();
+        let channel = match channel.as_mut() {
+            Some(value) => value,
+            None => continue,
+        };
 
         match net_rx.try_recv() {
             Ok(NetCommand::PauseHeartbeat(pause)) => {
