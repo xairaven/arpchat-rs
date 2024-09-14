@@ -151,7 +151,7 @@ pub fn show_message(id: ktp::Id, username: String, message: String, siv: &mut Cu
         username = username.with(ui::colors::from_id(&id)),
     );
 
-    ui::cursive_extension::update_or_append_txt(siv, "chat_inner", &message, print);
+    ui::cursive_extension::update_or_append_txt(siv, "chat_area", &message, print);
     siv.call_on_name(&message, |child: &mut NamedView<TextView>| {
         child.set_name("");
     });
@@ -165,7 +165,7 @@ pub fn presence_update(
         UpdatePresenceKind::JoinOrReconnect => {
             ui::cursive_extension::append_txt(
                 siv,
-                "chat_inner",
+                "chat_area",
                 format!("> {username} logged on").dark_grey().to_string(),
             );
         },
@@ -174,7 +174,7 @@ pub fn presence_update(
         {
             ui::cursive_extension::append_txt(
                 siv,
-                "chat_inner",
+                "chat_area",
                 format!("> {previous_username} is now known as {username}")
                     .dark_grey()
                     .to_string(),
@@ -198,7 +198,7 @@ pub fn presence_update(
 pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
     ui::cursive_extension::append_txt(
         siv,
-        "chat_inner",
+        "chat_area",
         format!("> {username} disconnected, bye!")
             .dark_grey()
             .to_string(),
