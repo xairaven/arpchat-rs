@@ -48,6 +48,22 @@ pub fn alert_user() {
     let _ = stdout().flush();
 }
 
+pub fn send_message(
+    message_text: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
+) {
+    if message_text.eq("/offline") {
+        let _ = net_tx.try_send(NetCommand::PauseHeartbeat(true));
+    } else if message_text.eq("/online") {
+        let _ = net_tx.try_send(NetCommand::PauseHeartbeat(false));
+    } else if !message_text.is_empty() {
+        let result = net_tx.try_send(NetCommand::SendMessage { message_text });
+
+        if let Err(err) = result {
+            ui::dialog::error::show(siv, err);
+        }
+    }
+}
+
 pub fn set_ether_type(
     ether_type: EtherType, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
 ) {

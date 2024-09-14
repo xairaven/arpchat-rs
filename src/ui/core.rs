@@ -33,7 +33,7 @@ pub fn start() {
                     dialog::error::show_try_again(&mut event_loop, err);
                 },
                 UICommand::SendMessage { message_text } => {
-                    // TODO: Call net command
+                    ui::commands::send_message(message_text, &mut event_loop, &net_tx)
                 },
                 UICommand::SetEtherType(ether_type) => {
                     ui::commands::set_ether_type(ether_type, &mut event_loop, &net_tx);
