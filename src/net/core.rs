@@ -20,6 +20,8 @@ enum NetThreadState {
 }
 
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
+    log::info!("Net thread started.");
+
     let session_id = ktp::generate_id();
     let mut session_username = String::new();
 
@@ -32,14 +34,19 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
     let mut channel: Option<Channel> = None;
 
+    log::info!("Net thread loop started.");
     loop {
         if let Ok(NetCommand::SetInterface { interface_name }) = net_rx.try_recv() {
             let result = interface::channel_from_name(interface_name);
             if let Err(err) = result {
+                log::error!("{}", err.to_string());
                 send_net_error_to_ui(&ui_tx, err);
+
                 continue;
             }
             channel = result.ok();
+
+            log::info!("Net channel created");
         }
         if channel.is_none() {
             continue;
@@ -47,8 +54,13 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         let mut channel = channel.take().unwrap();
 
         match net_rx.try_recv() {
-            Ok(NetCommand::PauseHeartbeat(pause)) => pause_heartbeat = pause,
+            Ok(NetCommand::PauseHeartbeat(pause)) => {
+                log::info!("Net Command: Pause Heartbeat called. Value = {pause}");
+                pause_heartbeat = pause
+            },
             Ok(NetCommand::SendMessage { message_text }) => {
+                log::info!("Net Command: Send Message called.");
+
                 ui_tx
                     .try_send(UICommand::ShowMessage {
                         id: session_id,
@@ -61,21 +73,33 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     id: session_id,
                     message_text,
                 });
+
+                log::info!("Net Command: Sent packet!");
+
                 if let Err(err) = result {
+                    log::error!("{}", err.to_string());
                     send_net_error_to_ui(&ui_tx, err);
                 }
             },
             Ok(NetCommand::SetInterface { .. }) => {
+                log::error!("{}", NetError::InterfaceAlreadySet.to_string());
+
                 send_net_error_to_ui(&ui_tx, NetError::InterfaceAlreadySet)
             },
             Ok(NetCommand::SetEtherType(ether_type)) => {
+                log::info!("Net Command: Set EtherType. Set {}", ether_type);
+
                 channel.set_ether_type(ether_type);
             },
             Ok(NetCommand::Terminate) => {
+                log::info!("Net Command: Terminate...");
+
                 let _ = channel.try_send(Packet::Disconnect(session_id));
                 break;
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
+                log::info!("Net Command: Update username.");
+
                 session_username = new_username;
 
                 if state == NetThreadState::NeedsUsername {
@@ -88,6 +112,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
         let result_recv_packet = channel.try_recv();
         if let Err(err) = result_recv_packet {
+            log::error!("{}", NetError::InterfaceAlreadySet.to_string());
             send_net_error_to_ui(&ui_tx, err);
             break;
         }
@@ -95,6 +120,8 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         match packet {
             None => {},
             Some(Packet::Message { id, message_text }) => {
+                log::info!("Channel: Message Packet received.");
+
                 let username = match online.get(&id) {
                     Some((_, username)) => username.clone(),
                     None => "Unknown".to_string(),
@@ -114,6 +141,8 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     .unwrap();
             },
             Some(Packet::PresenceBroadcastRequest) => {
+                log::info!("Channel: Presence Broadcast Request received.");
+
                 let is_user_joining = state == NeedsInitialPresence;
                 let packet = Packet::PresenceInformation {
                     id: session_id,
@@ -128,6 +157,8 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 is_join,
                 username,
             }) => {
+                log::info!("Channel: Presence Information packet received.");
+
                 match online.insert(some_id, (Instant::now(), username.clone())) {
                     Some((_, previous_username)) => ui_tx
                         .try_send(UICommand::PresenceUpdate {
@@ -158,6 +189,8 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 }
             },
             Some(Packet::Disconnect(some_id)) => {
+                log::info!("Channel: Disconnection packet received.");
+
                 if let Some((_, username)) = online.remove(&some_id) {
                     ui_tx
                         .try_send(UICommand::RemovePresence {
@@ -179,6 +212,8 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                         username: session_username.clone(),
                     })
                     .unwrap();
+
+                log::info!("Heartbeat: PresenceInformation packet sent");
             }
 
             let mut to_remove = vec![];
