@@ -34,7 +34,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
     let mut channel: Option<Channel> = None;
 
-    log::info!("Net thread loop started.");
+    log::info!("Interface loop started.");
     loop {
         if let Ok(NetCommand::SetInterface { interface_name }) = net_rx.try_recv() {
             let result = interface::channel_from_name(interface_name);
@@ -44,19 +44,23 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
                 continue;
             }
-            channel = result.ok();
 
+            channel = result.ok();
             log::info!("Net channel created");
+
+            break;
         }
 
         if channel.is_none() {
             continue;
         }
-        let channel = match channel.as_mut() {
-            Some(value) => value,
-            None => continue,
-        };
+    }
 
+    // Checked in previous loop
+    let mut channel = channel.unwrap();
+
+    log::info!("Net Thread loop started.");
+    loop {
         match net_rx.try_recv() {
             Ok(NetCommand::PauseHeartbeat(pause)) => {
                 log::info!("Net Command: Pause Heartbeat called. Value = {pause}");
