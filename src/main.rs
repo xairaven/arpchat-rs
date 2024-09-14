@@ -1,5 +1,6 @@
 pub mod config;
 pub mod error;
+pub mod logger;
 pub mod net;
 pub mod ui;
 
@@ -10,6 +11,13 @@ extern crate core;
 // Defining folder with locales. Path: crate-root/locales
 rust_i18n::i18n!("locales", fallback = "English");
 
+const LOG_FILENAME: &str = "log.txt";
+
 fn main() {
+    logger::init(log::LevelFilter::Info, LOG_FILENAME).unwrap_or_else(|err| {
+        log::error!("Error: {err}");
+        std::process::exit(1);
+    });
+
     ui::core::start();
 }
