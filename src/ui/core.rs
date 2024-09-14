@@ -60,7 +60,13 @@ pub fn start() {
                     is_inactive,
                     kind,
                 } => {
-                    // TODO: ...
+                    ui::commands::presence_update(
+                        id,
+                        username,
+                        is_inactive,
+                        kind,
+                        &mut event_loop,
+                    );
                 },
                 UICommand::RemovePresence { id, username } => {
                     // TODO: ...

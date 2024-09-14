@@ -156,3 +156,41 @@ pub fn show_message(id: ktp::Id, username: String, message: String, siv: &mut Cu
         child.set_name("");
     });
 }
+
+pub fn presence_update(
+    id: ktp::Id, username: String, is_inactive: bool, kind: UpdatePresenceKind,
+    siv: &mut Cursive,
+) {
+    match kind {
+        UpdatePresenceKind::JoinOrReconnect => {
+            ui::cursive_extension::append_txt(
+                siv,
+                "chat_inner",
+                format!("> {username} logged on").dark_grey().to_string(),
+            );
+        },
+        UpdatePresenceKind::UsernameChange { previous_username }
+            if previous_username != username =>
+        {
+            ui::cursive_extension::append_txt(
+                siv,
+                "chat_inner",
+                format!("> {previous_username} is now known as {username}")
+                    .dark_grey()
+                    .to_string(),
+            );
+        },
+        _ => {},
+    }
+
+    // Update username in presences list.
+    ui::cursive_extension::update_or_append_txt(
+        siv,
+        "presences",
+        &format!("{id:x?}_presence"),
+        match is_inactive {
+            true => format!("- {username}").dark_grey().to_string(),
+            false => format!("{} {username}", "*".with(ui::colors::from_id(&id))),
+        },
+    );
+}
