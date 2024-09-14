@@ -67,9 +67,16 @@ pub fn start() {
                     id,
                     username,
                     message,
+                    is_outgoing_message,
                 } => {
                     log::info!("UI Command: Show Message called.");
-                    ui::commands::show_message(id, username, message, &mut event_loop);
+                    ui::commands::show_message(
+                        id,
+                        username,
+                        message,
+                        is_outgoing_message,
+                        &mut event_loop,
+                    );
                 },
                 UICommand::PresenceUpdate {
                     id,

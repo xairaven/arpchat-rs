@@ -74,6 +74,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                         id: session_id,
                         username: session_username.clone(),
                         message: message_text.clone(),
+                        is_outgoing_message: true,
                     })
                     .unwrap();
 
@@ -145,6 +146,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                         id,
                         username,
                         message: message_text,
+                        is_outgoing_message: false,
                     })
                     .unwrap();
             },

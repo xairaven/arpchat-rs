@@ -29,6 +29,7 @@ pub enum UICommand {
         id: ktp::Id,
         username: String,
         message: String,
+        is_outgoing_message: bool,
     },
 
     PresenceUpdate {
@@ -136,10 +137,13 @@ pub fn set_username(username: String, siv: &mut Cursive, net_tx: &Sender<NetComm
     ui::main_window::update_username_title(siv, &username);
 }
 
-pub fn show_message(id: ktp::Id, username: String, message: String, siv: &mut Cursive) {
+pub fn show_message(
+    id: ktp::Id, username: String, message: String, is_outgoing_message: bool,
+    siv: &mut Cursive,
+) {
     let now = chrono::offset::Local::now();
 
-    let print = format!(
+    let mut print = format!(
         "{time} [{username}] {message}",
         time = format!(
             "{hours:02}:{mins:02}:{secs:02}",
@@ -147,14 +151,21 @@ pub fn show_message(id: ktp::Id, username: String, message: String, siv: &mut Cu
             mins = now.minute(),
             secs = now.second()
         )
+            // TODO: FIX THIS
         .dark_grey(),
         username = username.with(ui::colors::from_id(&id)),
     );
 
+    if is_outgoing_message {
+        print += &" sending...".dark_grey().to_string();
+    }
+
     ui::cursive_extension::update_or_append_txt(siv, "chat_area", &message, print);
-    siv.call_on_name(&message, |child: &mut NamedView<TextView>| {
-        child.set_name("");
-    });
+    if !is_outgoing_message {
+        siv.call_on_name(&message, |child: &mut NamedView<TextView>| {
+            child.set_name("");
+        });
+    }
 }
 
 pub fn presence_update(
