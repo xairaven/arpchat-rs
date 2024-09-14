@@ -6,6 +6,7 @@ edition = "2021"
 rust-version = "1.81"
 
 [dependencies]
+chrono = "0.4.38"
 crossbeam = "0.8.4"
 cursive = { version = "0.21.1", features = ["toml"]}
 directories = "5.0.1"
