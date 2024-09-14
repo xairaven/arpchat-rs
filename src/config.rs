@@ -2,10 +2,12 @@ use crate::error::config::ConfigError;
 use crate::net::ether_type::EtherType;
 use crate::ui;
 use directories::ProjectDirs;
+use log::LevelFilter;
 use rust_i18n::once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str;
+use std::str::FromStr;
 use std::string::ToString;
 use std::sync::Mutex;
 use std::{env, fs};
@@ -18,10 +20,22 @@ pub struct Config {
     pub ether_type: Option<EtherType>,
     pub interface_name: Option<String>,
     pub language: Option<String>,
+    pub log_filename: Option<String>,
+    pub log_level: Option<String>,
     pub username: Option<String>,
 }
 
 impl Config {
+    pub fn get_log_level(&self) -> Option<LevelFilter> {
+        if let Some(log_level_str) = &self.log_level {
+            let level = LevelFilter::from_str(log_level_str);
+
+            return level.ok();
+        }
+
+        None
+    }
+
     pub fn load() -> Self {
         match Self::get_config_path() {
             Ok(path) => {
