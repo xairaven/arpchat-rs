@@ -1,5 +1,7 @@
+pub mod colors;
 pub mod commands;
 pub mod core;
+pub mod cursive_extension;
 pub mod main_window;
 
 pub mod dialog {

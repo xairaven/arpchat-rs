@@ -52,7 +52,7 @@ pub fn start() {
                     username,
                     message,
                 } => {
-                    // TODO: Show message
+                    ui::commands::show_message(id, username, message, &mut event_loop);
                 },
                 UICommand::PresenceUpdate {
                     id,
