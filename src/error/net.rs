@@ -8,6 +8,9 @@ pub enum NetError {
     #[error("Couldn't serialize ARP packet")]
     ARPSerializeFailed,
 
+    #[error("Couldn't deserialize ARP packet")]
+    ARPDeserializeFailed,
+
     #[error("Couldn't capture packet")]
     CaptureFailed,
 

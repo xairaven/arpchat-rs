@@ -146,9 +146,42 @@ impl Channel {
         }
 
         if let &[tag, seq, total, ref inner @ ..] = &data[ktp::PACKET_PREFIX.len()..] {
-            // TODO: Deserializing...
+            let id_size = size_of::<ktp::Id>();
 
-            todo!()
+            let id: ktp::Id = inner[..id_size]
+                .try_into()
+                .map_err(|_| NetError::ARPDeserializeFailed)?;
+            // Skip if we already have this packet
+            if self.recent.contains(&id) {
+                return Ok(None);
+            }
+
+            let inner = &inner[id_size..];
+
+            if let Some(parts) = self.buffer.get_mut(&id) {
+                parts[seq as usize] = inner.to_vec();
+            } else {
+                let mut parts = vec![vec![]; total as usize + 1];
+                parts[seq as usize] = inner.to_vec();
+                self.buffer.insert(id, parts);
+            }
+
+            let parts = self.buffer.get(&id).ok_or(NetError::ARPDeserializeFailed)?;
+
+            // Short-circuit if we don't have all the parts yet.
+            if !parts.iter().all(|p| !p.is_empty()) {
+                return Ok(None);
+            }
+
+            // Put the packet together
+            let packet = ktp::Packet::deserialize(tag, &parts.concat());
+            if let Some(packet) = packet {
+                self.buffer.remove(&id);
+                self.recent.push_back(id);
+                Ok(Some(packet))
+            } else {
+                Err(NetError::ARPDeserializeFailed)
+            }
         } else {
             Ok(None)
         }
