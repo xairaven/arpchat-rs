@@ -9,6 +9,7 @@
 
   "menu.change_username": "Change username",
   "menu.help": "Help",
+  "menu.logging_settings": "Logging settings",
   "menu.switch_protocol": "Switch Protocol",
   "menu.quit": "Quit",
 
@@ -17,9 +18,10 @@
 
   "title.error": "Error!",
   "title.help": "Help",
-  "title.protocol_selection": "Select a Protocol",
   "title.interface_selection": "Select an Interface",
   "title.language_selection": "Select a Language",
+  "title.logging_settings": "Logging Settings",
   "title.online_users": "Online Users",
+  "title.protocol_selection": "Select a Protocol",
   "title.username_selection": "Set an Username"
 }

@@ -9,5 +9,6 @@ pub mod dialog {
     pub mod ether_type;
     pub mod interface;
     pub mod localization;
+    pub mod logger_settings;
     pub mod username;
 }

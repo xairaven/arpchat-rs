@@ -9,6 +9,7 @@
 
   "menu.change_username": "Змінити нікнейм",
   "menu.help": "Довідка",
+  "menu.logging_settings": "Налаштування журналювання",
   "menu.switch_protocol": "Змінити протокол",
   "menu.quit": "Вихід",
 
@@ -17,9 +18,10 @@
 
   "title.error": "Помилка!",
   "title.help": "Довідка",
-  "title.protocol_selection": "Оберіть протокол",
   "title.interface_selection": "Оберіть інтерфейс",
   "title.language_selection": "Оберіть мову",
+  "title.logging_settings": "Налаштування журналювання",
   "title.online_users": "Користувачі онлайн",
+  "title.protocol_selection": "Оберіть протокол",
   "title.username_selection": "Встановіть ім'я користувача"
 }
