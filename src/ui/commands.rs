@@ -171,7 +171,7 @@ pub fn show_message(
     let mut print = format!("{time} [{username}] {message}");
 
     if is_outgoing_message {
-        print += &" sending...".dark_grey().to_string();
+        print += &t!("text.message_sending").dark_grey().to_string();
     }
 
     ui::cursive_extension::update_or_append_txt(siv, "chat_area", &message, print);
@@ -188,21 +188,36 @@ pub fn presence_update(
 ) {
     match kind {
         UpdatePresenceKind::JoinOrReconnect => {
+            let translated = rust_i18n::replace_patterns(
+                &t!("text.user_connected"),
+                &["username"],
+                &[username.clone()],
+            );
+
             ui::cursive_extension::append_txt(
                 siv,
                 "chat_area",
-                format!("> {username} logged on").dark_grey().to_string(),
+                translated.dark_grey().to_string(),
             );
         },
         UpdatePresenceKind::UsernameChange { previous_username }
             if previous_username != username =>
         {
+            let translated = rust_i18n::replace_patterns(
+                &t!("text.user_changed_username"),
+                &["username"],
+                &[username.clone()],
+            );
+            let translated = rust_i18n::replace_patterns(
+                &translated,
+                &["previous_username"],
+                &[previous_username],
+            );
+
             ui::cursive_extension::append_txt(
                 siv,
                 "chat_area",
-                format!("> {previous_username} is now known as {username}")
-                    .dark_grey()
-                    .to_string(),
+                translated.dark_grey().to_string(),
             );
         },
         _ => {},
@@ -221,12 +236,16 @@ pub fn presence_update(
 }
 
 pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
+    let translated = rust_i18n::replace_patterns(
+        &t!("text.user_disconnected"),
+        &["username"],
+        &[username.clone()],
+    );
+
     ui::cursive_extension::append_txt(
         siv,
         "chat_area",
-        format!("> {username} disconnected, bye!")
-            .dark_grey()
-            .to_string(),
+        translated.dark_grey().to_string(),
     );
 
     // Remove from presences list.

@@ -18,6 +18,10 @@
   "text.ether_types": "Experimental versions 1 and 2 are more standards-compliant and generally more considerate towards other devices.\nIPv4 might offer better reliability on some networks.\n\n",
   "text.help": "Change window section - Tab\nMove around the window - arrows\nSwitch to menu - Esc",
   "text.changes_restart_needed": "To apply the changes, you must restart the program.",
+  "text.message_sending": " sending...",
+  "text.user_connected": "> %{username} logged on",
+  "text.user_changed_username": "> %{previous_username} is now known as %{username}",
+  "text.user_disconnected": "> %{username} disconnected, bye!",
 
   "title.error": "Error!",
   "title.help": "Help",
