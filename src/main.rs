@@ -12,10 +12,13 @@ extern crate core;
 // Defining folder with locales. Path: crate-root/locales
 rust_i18n::i18n!("locales", fallback = "English");
 
-const LOG_FILENAME: &str = "log.txt";
-
 fn main() {
-    logger::init(log::LevelFilter::Info, LOG_FILENAME).unwrap_or_else(|err| {
+    // TODO: Logger settings & To set up writing log level & log_filename to config
+    logger::init(
+        config::DEFAULT_LOG_LEVEL_FILTER,
+        config::DEFAULT_LOG_FILENAME,
+    )
+    .unwrap_or_else(|err| {
         log::error!("Error: {err}");
         std::process::exit(1);
     });

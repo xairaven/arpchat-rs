@@ -3,7 +3,7 @@ use crate::net::ether_type::EtherType;
 use crate::session;
 use directories::ProjectDirs;
 use log::LevelFilter;
-use rust_i18n::once_cell::sync::Lazy;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str;
@@ -14,6 +14,9 @@ use std::{env, fs};
 
 pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::load()));
 const CONFIG_FILENAME: &str = "config.toml";
+
+pub const DEFAULT_LOG_LEVEL_FILTER: LevelFilter = LevelFilter::Info;
+pub const DEFAULT_LOG_FILENAME: &str = "log.txt";
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Config {
@@ -26,14 +29,21 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn get_log_level(&self) -> Option<LevelFilter> {
-        if let Some(log_level_str) = &self.log_level {
-            let level = LevelFilter::from_str(log_level_str);
-
-            return level.ok();
+    pub fn get_log_filename(&self) -> Option<String> {
+        match self.log_filename {
+            Some(ref filename) if !filename.is_empty() => Some(filename.to_string()),
+            _ => Some(DEFAULT_LOG_FILENAME.to_string()),
         }
+    }
 
-        None
+    pub fn get_log_level(&self) -> Option<LevelFilter> {
+        let level = self
+            .log_level
+            .as_deref()
+            .and_then(|log_level_str| LevelFilter::from_str(log_level_str).ok())
+            .unwrap_or(DEFAULT_LOG_LEVEL_FILTER);
+
+        Some(level)
     }
 
     pub fn get_username(&self) -> Option<String> {
@@ -97,11 +107,31 @@ impl Config {
     }
 }
 
-/// Function for locking config and getting username.
+/// Getters with locking.
 pub fn lock_get_username() -> String {
     CONFIG
         .try_lock()
         .ok()
         .and_then(|locked_config| locked_config.get_username())
         .unwrap_or(session::INITIAL_USERNAME.to_string())
+}
+
+pub fn lock_get_log_filename() -> String {
+    if let Ok(config) = CONFIG.try_lock() {
+        if let Some(filename) = config.get_log_filename() {
+            return filename.to_string();
+        }
+    }
+
+    DEFAULT_LOG_FILENAME.to_string()
+}
+
+pub fn lock_get_log_level() -> LevelFilter {
+    if let Ok(config) = CONFIG.try_lock() {
+        if let Some(level) = config.get_log_level() {
+            return level;
+        }
+    }
+
+    DEFAULT_LOG_LEVEL_FILTER
 }
