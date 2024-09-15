@@ -18,5 +18,5 @@ pub fn init(log_level: LevelFilter, file_name: &str) -> Result<(), LoggerError> 
         .level(log_level)
         .chain(fern::Output::file(file, "\r\n"))
         .apply()
-        .map_err(|err| LoggerError::SetLoggerError(err))
+        .map_err(LoggerError::SetLoggerError)
 }

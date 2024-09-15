@@ -10,6 +10,7 @@ use crossbeam::channel::Sender;
 use cursive::backends::crossterm::crossterm::style::Stylize;
 use cursive::views::{LinearLayout, NamedView, TextView};
 use cursive::Cursive;
+use log::LevelFilter;
 
 pub enum UICommand {
     AlertUser,
@@ -23,6 +24,8 @@ pub enum UICommand {
     SetEtherType(EtherType),
     SetInterface(String),
     SetLanguage(String),
+    SetLogFileName(String),
+    SetLogLevel(LevelFilter),
     SetUsername(String),
 
     ShowMessage {
@@ -107,6 +110,20 @@ pub fn set_language(language: String) {
 
     if let Ok(mut config) = CONFIG.try_lock() {
         config.language = Some(language);
+        config.save().unwrap_or_default();
+    }
+}
+
+pub fn set_log_file_name(file_name: String) {
+    if let Ok(mut config) = CONFIG.try_lock() {
+        config.log_filename = Some(file_name);
+        config.save().unwrap_or_default();
+    }
+}
+
+pub fn set_log_level(level: LevelFilter) {
+    if let Ok(mut config) = CONFIG.try_lock() {
+        config.log_level = Some(level.to_string());
         config.save().unwrap_or_default();
     }
 }

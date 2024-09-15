@@ -9,18 +9,22 @@
 
   "menu.change_username": "Змінити нікнейм",
   "menu.help": "Довідка",
-  "menu.logging_settings": "Налаштування журналювання",
+  "menu.log_filename": "Логування: назва журналу",
+  "menu.log_level": "Логування: рівень",
+  "menu.settings": "Налаштування",
   "menu.switch_protocol": "Змінити протокол",
   "menu.quit": "Вихід",
 
   "text.ether_types": "Експериментальні протоколи EtherType 1 і 2 більш відповідають стандартам і, як правило, більш безпечні по відношенню до інших пристроїв.\nАле, IPv4 може бути надійнішим.\n\n",
   "text.help": "Змінити секцію вікна - Tab\nПереміщення по елементу - стрілки\nПеремикання на меню - Esc",
+  "text.changes_restart_needed": "Для застосування можливих змін треба перезавантажити програму.",
 
   "title.error": "Помилка!",
   "title.help": "Довідка",
   "title.interface_selection": "Оберіть інтерфейс",
   "title.language_selection": "Оберіть мову",
-  "title.logging_settings": "Налаштування журналювання",
+  "title.log_filename": "Назва журналу:",
+  "title.log_level": "Рівень логування:",
   "title.online_users": "Користувачі онлайн",
   "title.protocol_selection": "Оберіть протокол",
   "title.username_selection": "Встановіть ім'я користувача"

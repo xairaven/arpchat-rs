@@ -7,36 +7,54 @@ use cursive::view::ScrollStrategy;
 use cursive::views::{
     Dialog, EditView, LinearLayout, NamedView, Panel, ResizedView, ScrollView,
 };
-use cursive::Cursive;
+use cursive::{menu, Cursive};
 
 pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     const AUTOHIDE_MENU: bool = false;
     let initial_username = config::lock_get_username();
 
     siv.menubar()
-        .add_leaf(t!("menu.change_username"), {
-            let ui_tx = ui_tx.clone();
-            move |siv| {
-                const MAIN_WINDOW_INITIALIZED: bool = true;
-                ui::dialog::username::show_input_dialog(
-                    siv,
-                    ui_tx.clone(),
-                    MAIN_WINDOW_INITIALIZED,
-                );
-            }
-        })
-        .add_delimiter()
-        .add_leaf(t!("menu.switch_protocol"), {
-            let ui_tx = ui_tx.clone();
-            move |siv| ui::dialog::ether_type::show_select_dialog(siv, ui_tx.clone())
-        })
-        .add_delimiter()
-        .add_leaf(t!("menu.logging_settings"), {
-            let ui_tx = ui_tx.clone();
-            move |siv| {
-                ui::dialog::logger_settings::show_settings_dialog(siv, ui_tx.clone())
-            }
-        })
+        .add_subtree(
+            t!("menu.settings"),
+            menu::Tree::new()
+                .leaf(t!("menu.change_username"), {
+                    let ui_tx = ui_tx.clone();
+                    move |siv| {
+                        const MAIN_WINDOW_INITIALIZED: bool = true;
+                        ui::dialog::username::show_input_dialog(
+                            siv,
+                            ui_tx.clone(),
+                            MAIN_WINDOW_INITIALIZED,
+                        );
+                    }
+                })
+                .delimiter()
+                .leaf(t!("menu.switch_protocol"), {
+                    let ui_tx = ui_tx.clone();
+                    move |siv| {
+                        ui::dialog::ether_type::show_select_dialog(siv, ui_tx.clone())
+                    }
+                })
+                .delimiter()
+                .leaf(t!("menu.log_filename"), {
+                    let ui_tx = ui_tx.clone();
+                    move |siv| {
+                        ui::dialog::logger_settings::show_settings_log_filename(
+                            siv,
+                            ui_tx.clone(),
+                        )
+                    }
+                })
+                .leaf(t!("menu.log_level"), {
+                    let ui_tx = ui_tx.clone();
+                    move |siv| {
+                        ui::dialog::logger_settings::show_settings_log_level(
+                            siv,
+                            ui_tx.clone(),
+                        )
+                    }
+                }),
+        )
         .add_delimiter()
         .add_leaf(t!("menu.help"), show_help_dialog)
         .add_delimiter()

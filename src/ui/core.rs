@@ -63,6 +63,14 @@ pub fn start() {
                     log::info!("UI Command: Set Language called.");
                     ui::commands::set_language(language);
                 },
+                UICommand::SetLogFileName(file_name) => {
+                    log::info!("UI Command: Set Log File called.");
+                    ui::commands::set_log_file_name(file_name);
+                },
+                UICommand::SetLogLevel(level) => {
+                    log::info!("UI Command: Set Log Level called.");
+                    ui::commands::set_log_level(level);
+                },
                 UICommand::SetUsername(username) => {
                     log::info!("UI Command: Set Username called.");
                     ui::commands::set_username(

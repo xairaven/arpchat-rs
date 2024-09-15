@@ -13,10 +13,9 @@ extern crate core;
 rust_i18n::i18n!("locales", fallback = "English");
 
 fn main() {
-    // TODO: Logger settings & To set up writing log level & log_filename to config
     logger::init(
-        config::DEFAULT_LOG_LEVEL_FILTER,
-        config::DEFAULT_LOG_FILENAME,
+        config::lock_get_log_level(),
+        &config::lock_get_log_filename(),
     )
     .unwrap_or_else(|err| {
         log::error!("Error: {err}");
