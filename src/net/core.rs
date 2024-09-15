@@ -36,27 +36,31 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     let mut state = NetThreadState::NeedsUsername;
     let mut pause_heartbeat = false;
 
-    let mut channel: Option<Channel> = None;
+    let channel: Option<Channel>;
 
     log::info!("Interface loop started.");
     loop {
-        if let Ok(NetCommand::SetInterface { interface_name }) = net_rx.try_recv() {
-            let result = interface::channel_from_name(interface_name);
-            if let Err(err) = result {
-                log::error!("{}", err.to_string());
-                send_net_error_to_ui(&ui_tx, err);
+        match net_rx.try_recv() {
+            Ok(NetCommand::SetInterface { interface_name }) => {
+                let result = interface::channel_from_name(interface_name);
+                if let Err(err) = result {
+                    log::error!("{}", err.to_string());
+                    send_net_error_to_ui(&ui_tx, err);
 
-                continue;
-            }
+                    continue;
+                }
 
-            channel = result.ok();
-            log::info!("Net channel created");
+                channel = result.ok();
+                log::info!("Net channel created");
 
-            break;
-        }
+                break;
+            },
+            Ok(NetCommand::Terminate) => {
+                log::info!("Net Command: Terminate before setting interface.");
 
-        if channel.is_none() {
-            continue;
+                return;
+            },
+            _ => continue,
         }
     }
 
