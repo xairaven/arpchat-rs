@@ -142,19 +142,16 @@ pub fn show_message(
     siv: &mut Cursive,
 ) {
     let now = chrono::offset::Local::now();
+    let time = format!(
+        "{hours:02}:{minutes:02}:{seconds:02}",
+        hours = now.hour(),
+        minutes = now.minute(),
+        seconds = now.second()
+    )
+    .dark_grey();
+    let username = username.with(ui::colors::from_id(&id));
 
-    let mut print = format!(
-        "{time} [{username}] {message}",
-        time = format!(
-            "{hours:02}:{mins:02}:{secs:02}",
-            hours = now.hour(),
-            mins = now.minute(),
-            secs = now.second()
-        )
-            // TODO: FIX THIS
-        .dark_grey(),
-        username = username.with(ui::colors::from_id(&id)),
-    );
+    let mut print = format!("{time} [{username}] {message}");
 
     if is_outgoing_message {
         print += &" sending...".dark_grey().to_string();
@@ -197,7 +194,7 @@ pub fn presence_update(
     // Update username in presences list.
     ui::cursive_extension::update_or_append_txt(
         siv,
-        "presences",
+        "online_panel",
         &format!("{id:x?}_presence"),
         match is_inactive {
             true => format!("- {username}").dark_grey().to_string(),
@@ -216,7 +213,7 @@ pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
     );
 
     // Remove from presences list.
-    siv.call_on_name("presences", |presences: &mut LinearLayout| {
+    siv.call_on_name("online_panel", |presences: &mut LinearLayout| {
         presences
             .find_child_from_name(&format!("{id:x?}_presence"))
             .map(|presence| presences.remove_child(presence));
