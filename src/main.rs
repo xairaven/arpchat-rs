@@ -2,6 +2,7 @@ pub mod config;
 pub mod error;
 pub mod logger;
 pub mod net;
+pub mod session;
 pub mod ui;
 
 #[macro_use]

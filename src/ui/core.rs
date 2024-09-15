@@ -2,7 +2,7 @@ use crate::config::CONFIG;
 use crate::net::commands::NetCommand;
 use crate::ui::commands::UICommand;
 use crate::ui::dialog;
-use crate::{net, ui};
+use crate::{net, session, ui};
 use crossbeam::channel::unbounded;
 use cursive::Cursive;
 use std::thread;
@@ -10,6 +10,8 @@ use std::thread;
 pub fn start() {
     let (ui_tx, ui_rx) = unbounded::<UICommand>();
     let (net_tx, net_rx) = unbounded::<NetCommand>();
+
+    let mut ui_thread_username = String::from(session::INITIAL_USERNAME);
 
     log::info!("Channels created.");
 
@@ -61,7 +63,12 @@ pub fn start() {
                 },
                 UICommand::SetUsername(username) => {
                     log::info!("UI Command: Set Username called.");
-                    ui::commands::set_username(username, &mut event_loop, &net_tx)
+                    ui::commands::set_username(
+                        username,
+                        &mut ui_thread_username,
+                        &mut event_loop,
+                        &net_tx,
+                    );
                 },
                 UICommand::ShowMessage {
                     id,

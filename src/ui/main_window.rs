@@ -11,7 +11,7 @@ use cursive::Cursive;
 
 pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     const AUTOHIDE_MENU: bool = false;
-    let initial_username = config::get_username();
+    let initial_username = config::lock_get_username();
 
     siv.menubar()
         .add_leaf(t!("menu.change_username"), {

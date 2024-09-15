@@ -19,6 +19,9 @@ enum NetThreadState {
     Ready,
 }
 
+// Username for offline users that send messages
+pub const UNKNOWN_USERNAME: &str = "Unknown";
+
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     log::info!("Net thread started.");
 
@@ -133,7 +136,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
                 let username = match online.get(&id) {
                     Some((_, username)) => username.clone(),
-                    None => "Unknown".to_string(),
+                    None => UNKNOWN_USERNAME.to_string(),
                 };
 
                 // Alerting user if there's username in message

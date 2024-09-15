@@ -1,6 +1,6 @@
 use crate::error::config::ConfigError;
 use crate::net::ether_type::EtherType;
-use crate::ui;
+use crate::session;
 use directories::ProjectDirs;
 use log::LevelFilter;
 use rust_i18n::once_cell::sync::Lazy;
@@ -34,6 +34,25 @@ impl Config {
         }
 
         None
+    }
+
+    pub fn get_username(&self) -> Option<String> {
+        let mut username = self.username.clone().unwrap_or_else(Self::get_hostname);
+
+        if username.is_empty() {
+            username = session::INITIAL_USERNAME.to_string()
+        };
+
+        Some(session::normalize_username(&username))
+    }
+
+    fn get_hostname() -> String {
+        gethostname::gethostname()
+            .to_string_lossy()
+            .split('.')
+            .next()
+            .unwrap_or("")
+            .to_string()
     }
 
     pub fn load() -> Self {
@@ -78,22 +97,11 @@ impl Config {
     }
 }
 
-/// Getting username from config.
-/// If there's no username in config, using system hostname.
-pub fn get_username() -> String {
-    let username = CONFIG
+/// Function for locking config and getting username.
+pub fn lock_get_username() -> String {
+    CONFIG
         .try_lock()
         .ok()
-        .and_then(|locked_config| locked_config.username.clone())
-        .filter(|username| !username.is_empty())
-        .unwrap_or_else(|| {
-            gethostname::gethostname()
-                .to_string_lossy()
-                .split('.')
-                .next()
-                .unwrap_or("")
-                .to_string()
-        });
-
-    ui::dialog::username::normalize_username(&username)
+        .and_then(|locked_config| locked_config.get_username())
+        .unwrap_or(session::INITIAL_USERNAME.to_string())
 }

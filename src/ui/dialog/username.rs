@@ -1,13 +1,10 @@
-use crate::config;
 use crate::ui;
 use crate::ui::commands::UICommand;
+use crate::{config, session};
 use crossbeam::channel::{Sender, TrySendError};
 use cursive::view::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView};
 use cursive::Cursive;
-
-pub const MAX_USERNAME_LENGTH: usize = 25;
-pub const MIN_USERNAME_LENGTH: usize = 2;
 
 pub fn show_input_dialog(
     siv: &mut Cursive, ui_tx: Sender<UICommand>, main_initialized: bool,
@@ -16,11 +13,11 @@ pub fn show_input_dialog(
         .title(t!("title.username_selection"))
         .content(
             EditView::new()
-                .content(config::get_username())
+                .content(config::lock_get_username())
                 .on_submit({
                     let ui_tx = ui_tx.clone();
                     move |siv, username| {
-                        let username = normalize_username(username);
+                        let username = session::normalize_username(username);
 
                         let result =
                             ui_tx.try_send(UICommand::SetUsername(username.to_owned()));
@@ -33,7 +30,7 @@ pub fn show_input_dialog(
                         );
                     }
                 })
-                .max_content_width(MAX_USERNAME_LENGTH)
+                .max_content_width(session::MAX_USERNAME_LENGTH)
                 .with_name("username_input"),
         )
         .button(t!("button.save"), move |siv| {
@@ -42,7 +39,7 @@ pub fn show_input_dialog(
                     input.get_content()
                 })
                 .unwrap();
-            let username = normalize_username(username.as_str());
+            let username = session::normalize_username(username.as_str());
 
             let result = ui_tx.try_send(UICommand::SetUsername(username.to_string()));
 
@@ -61,20 +58,6 @@ pub fn show_input_dialog(
     .min_width(72);
 
     siv.add_layer(dialog);
-}
-
-pub fn normalize_username(username: &str) -> String {
-    let mut result = username.to_string();
-
-    if username.len() > MAX_USERNAME_LENGTH {
-        result = username[..25].to_string();
-    }
-
-    if username.len() < MIN_USERNAME_LENGTH {
-        result = String::from("Anonymous");
-    }
-
-    result
 }
 
 fn process_operation_result(
