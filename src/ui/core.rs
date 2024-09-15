@@ -15,11 +15,13 @@ pub fn start() {
 
     log::info!("Channels created.");
 
-    let net_thread = thread::spawn({
-        let ui_tx = ui_tx.clone();
-        move || net::core::start(ui_tx, net_rx)
-    });
-
+    let net_thread = thread::Builder::new()
+        .name("Net Thread".to_string())
+        .spawn({
+            let ui_tx = ui_tx.clone();
+            move || net::core::start(ui_tx, net_rx)
+        })
+        .unwrap();
     log::info!("Net thread spawned.");
 
     let mut siv = cursive::default();
