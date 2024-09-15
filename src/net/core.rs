@@ -7,6 +7,7 @@ use crate::net::presence::{
     UpdatePresenceKind, HEARTBEAT_INTERVAL, INACTIVE_TIMEOUT, OFFLINE_TIMEOUT,
 };
 use crate::net::{interface, ktp};
+use crate::session;
 use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
 use std::collections::{HashMap, HashSet};
@@ -26,7 +27,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     log::info!("Net thread started.");
 
     let session_id = ktp::generate_id();
-    let mut session_username = String::new();
+    let mut session_username = String::from(session::INITIAL_USERNAME);
 
     let mut last_heartbeat = Instant::now();
     let mut online: HashMap<ktp::Id, (Instant, String)> = HashMap::new();
