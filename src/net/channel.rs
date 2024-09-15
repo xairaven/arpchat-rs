@@ -50,9 +50,12 @@ impl Channel {
 
     pub fn try_send(&mut self, packet: ktp::Packet) -> Result<(), NetError> {
         let data = packet.serialize();
-        let parts: Vec<&[u8]> = data.chunks(ktp::PACKET_DATA_SIZE).collect();
+        let mut parts: Vec<&[u8]> = data.chunks(ktp::PACKET_DATA_SIZE).collect();
 
-        // Possible bug: need to push .
+        // In case of PresenceBroadcastRequest packet.
+        if packet.tag() == 1 {
+            parts.push(b".");
+        }
 
         if parts.len() - 1 > u8::MAX as usize {
             return Err(NetError::MessageTooLong);
