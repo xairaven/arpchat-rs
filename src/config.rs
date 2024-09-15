@@ -108,12 +108,12 @@ impl Config {
 }
 
 /// Getters with locking.
-pub fn lock_get_username() -> String {
+pub fn lock_get_ether_type() -> EtherType {
     CONFIG
         .try_lock()
         .ok()
-        .and_then(|locked_config| locked_config.get_username())
-        .unwrap_or(session::INITIAL_USERNAME.to_string())
+        .and_then(|locked_config| locked_config.ether_type)
+        .unwrap_or_default()
 }
 
 pub fn lock_get_log_filename() -> String {
@@ -134,4 +134,12 @@ pub fn lock_get_log_level() -> LevelFilter {
     }
 
     DEFAULT_LOG_LEVEL_FILTER
+}
+
+pub fn lock_get_username() -> String {
+    CONFIG
+        .try_lock()
+        .ok()
+        .and_then(|locked_config| locked_config.get_username())
+        .unwrap_or(session::INITIAL_USERNAME.to_string())
 }

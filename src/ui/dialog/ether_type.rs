@@ -1,7 +1,6 @@
-use crate::config::CONFIG;
 use crate::net::ether_type::EtherType;
-use crate::ui;
 use crate::ui::commands::UICommand;
+use crate::{config, ui};
 use crossbeam::channel::Sender;
 use cursive::traits::Resizable;
 use cursive::views::{Dialog, LinearLayout, SelectView, TextView};
@@ -9,14 +8,11 @@ use cursive::Cursive;
 use strum::IntoEnumIterator;
 
 pub fn show_select_dialog(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
-    let preferred_ether_type_index = CONFIG
-        .try_lock()
-        .ok()
-        .and_then(|locked_config| locked_config.ether_type)
-        .and_then(|config_ether_type| {
-            EtherType::iter().position(|ether_type| {
-                ether_type.to_string().eq(&config_ether_type.to_string())
-            })
+    let preferred_ether_type_index = EtherType::iter()
+        .position(|ether_type| {
+            ether_type
+                .to_string()
+                .eq(&config::lock_get_ether_type().to_string())
         })
         .unwrap_or_default();
 
