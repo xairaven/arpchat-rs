@@ -15,7 +15,7 @@ use std::{env, fs};
 pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::load()));
 const CONFIG_FILENAME: &str = "config.toml";
 
-pub const DEFAULT_LOG_LEVEL_FILTER: LevelFilter = LevelFilter::Info;
+pub const DEFAULT_LOG_LEVEL_FILTER: LevelFilter = LevelFilter::Warn;
 pub const DEFAULT_LOG_FILENAME: &str = "log.txt";
 
 #[derive(Serialize, Deserialize, Default)]

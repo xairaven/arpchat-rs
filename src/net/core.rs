@@ -91,7 +91,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     message_text,
                 });
 
-                log::info!("Net Command: Sent packet!");
+                log::debug!("Net Command: Sent packet!");
 
                 if let Err(err) = result {
                     log::error!("{}", err.to_string());
@@ -137,7 +137,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         match packet {
             None => {},
             Some(Packet::Message { id, message_text }) => {
-                log::info!("Channel: Message Packet received.");
+                log::debug!("Channel: Message Packet received.");
 
                 let username = match online.get(&id) {
                     Some((_, username)) => username.clone(),
@@ -159,7 +159,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     .unwrap();
             },
             Some(Packet::PresenceBroadcastRequest) => {
-                log::info!("Channel: Presence Broadcast Request received.");
+                log::debug!("Channel: Presence Broadcast Request received.");
 
                 let is_user_joining = state == NeedsInitialPresence;
                 let packet = Packet::PresenceInformation {
@@ -175,7 +175,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 is_join,
                 username,
             }) => {
-                log::info!("Channel: Presence Information packet received.");
+                log::debug!("Channel: Presence Information packet received.");
 
                 match online.insert(some_id, (Instant::now(), username.clone())) {
                     Some((_, previous_username)) => ui_tx
@@ -207,7 +207,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 }
             },
             Some(Packet::Disconnect(some_id)) => {
-                log::info!("Channel: Disconnection packet received.");
+                log::debug!("Channel: Disconnection packet received.");
 
                 if let Some((_, username)) = online.remove(&some_id) {
                     ui_tx
@@ -231,7 +231,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     })
                     .unwrap();
 
-                log::info!("Heartbeat: PresenceInformation packet sent");
+                log::debug!("Heartbeat: PresenceInformation packet sent");
             }
 
             let mut to_remove = vec![];
