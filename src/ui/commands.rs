@@ -8,6 +8,7 @@ use crate::{session, ui};
 use chrono::Timelike;
 use crossbeam::channel::Sender;
 use cursive::backends::crossterm::crossterm::style::Stylize;
+use cursive::utils::markup;
 use cursive::views::{LinearLayout, NamedView, TextView};
 use cursive::Cursive;
 use log::LevelFilter;
@@ -174,6 +175,8 @@ pub fn show_message(
         print += &t!("text.message_sending").dark_grey().to_string();
     }
 
+    let print = markup::ansi::parse(print);
+
     ui::cursive_extension::update_or_append_txt(siv, "chat_area", &message, print);
     if !is_outgoing_message {
         siv.call_on_name(&message, |child: &mut NamedView<TextView>| {
@@ -197,7 +200,7 @@ pub fn presence_update(
             ui::cursive_extension::append_txt(
                 siv,
                 "chat_area",
-                translated.dark_grey().to_string(),
+                markup::ansi::parse(translated.dark_grey().to_string()),
             );
         },
         UpdatePresenceKind::UsernameChange { previous_username }
@@ -217,7 +220,7 @@ pub fn presence_update(
             ui::cursive_extension::append_txt(
                 siv,
                 "chat_area",
-                translated.dark_grey().to_string(),
+                markup::ansi::parse(translated.dark_grey().to_string()),
             );
         },
         _ => {},
@@ -229,8 +232,11 @@ pub fn presence_update(
         "online_panel",
         &format!("{id:x?}_presence"),
         match is_inactive {
-            true => format!("- {username}").dark_grey().to_string(),
-            false => format!("{} {username}", "*".with(ui::colors::from_id(&id))),
+            true => markup::ansi::parse(format!("- {username}").dark_grey().to_string()),
+            false => markup::ansi::parse(format!(
+                "{} {username}",
+                "*".with(ui::colors::from_id(&id))
+            )),
         },
     );
 }
@@ -245,7 +251,7 @@ pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
     ui::cursive_extension::append_txt(
         siv,
         "chat_area",
-        translated.dark_grey().to_string(),
+        markup::ansi::parse(translated.dark_grey().to_string()),
     );
 
     // Remove from presences list.
