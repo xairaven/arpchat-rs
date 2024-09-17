@@ -1,0 +1,79 @@
+name: Build & Create release
+
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: WinPcap Developer Pack download
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir lib
+          cd lib
+          curl https://doggo.ninja/DRoba9.lib --output Packet.lib
+          cd ..    
+
+      - name: Build
+        run: cargo build --verbose --release
+
+      - name: Archive files on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          tar -czvf arpchat-v${{ github.ref_name }}-ubuntu.tar.gz -C target/release/ arpchat-rs
+
+      - name: Archive files on macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          tar -czvf arpchat-v${{ github.ref_name }}-macos.tar.gz -C target/release/ arpchat-rs
+
+      - name: Archive files on Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          tar.exe acvf arpchat-v${{ github.ref_name }}-windows.zip -C target/release/ arpchat-rs.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Release-${{ matrix.os }}-v${{ github.ref_name }}
+          path: |
+            arpchat-v${{ github.ref_name }}*
+          retention-days: 1
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      - name: Download artifacts to release
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+
+      - name: ls -la
+        run: ls -la
+
+      - name: Create release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ github.ref_name }}
+          title: ${{ github.ref_name }}
+          prerelease: false
+          files: |
+            Release-windows-latest-v${{ github.ref_name }}
+            Release-ubuntu-latest-v${{ github.ref_name }}
+            Release-macos-latest-v${{ github.ref_name }}
