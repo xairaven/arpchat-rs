@@ -125,12 +125,13 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         }
 
         let result_recv_packet = channel.try_recv();
-        if let Err(err) = result_recv_packet {
-            log::error!("Channel recv error: {}", err.to_string());
-            send_net_error_to_ui(&ui_tx, err);
-            break;
-        }
-        let packet = result_recv_packet.unwrap();
+        let packet = match result_recv_packet {
+            Ok(value) => value,
+            Err(err) => {
+                log::error!("Channel recv error: {}", err.to_string());
+                continue;
+            },
+        };
         match packet {
             None => {},
             Some(Packet::Message { id, message_text }) => {
@@ -233,37 +234,46 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         if last_heartbeat.elapsed() > HEARTBEAT_INTERVAL && state == NetThreadState::Ready
         {
             if !pause_heartbeat {
-                channel
-                    .try_send(Packet::PresenceInformation {
-                        id: session_id,
-                        is_join: false,
-                        username: session_username.clone(),
-                    })
-                    .unwrap();
-
-                log::debug!("Heartbeat: PresenceInformation packet sent");
+                if let Err(err) = channel.try_send(Packet::PresenceInformation {
+                    id: session_id,
+                    is_join: false,
+                    username: session_username.clone(),
+                }) {
+                    log::error!(
+                        "After sending Heartbeat PresenceInformation: {}",
+                        err.to_string()
+                    );
+                } else {
+                    log::debug!("Heartbeat: PresenceInformation packet sent");
+                }
             }
 
             let mut to_remove = vec![];
             for (id, (user_last_heartbeat, username)) in online.iter() {
                 if user_last_heartbeat.elapsed() > OFFLINE_TIMEOUT {
                     offline.insert(*id);
-                    ui_tx
-                        .try_send(UICommand::RemovePresence {
-                            id: *id,
-                            username: username.clone(),
-                        })
-                        .unwrap();
+                    if let Err(err) = ui_tx.try_send(UICommand::RemovePresence {
+                        id: *id,
+                        username: username.clone(),
+                    }) {
+                        log::error!(
+                            "After sending Heartbeat RemovePresence: {}",
+                            err.to_string()
+                        );
+                    }
                     to_remove.push(*id);
                 } else if last_heartbeat.elapsed() > INACTIVE_TIMEOUT {
-                    ui_tx
-                        .try_send(UICommand::PresenceUpdate {
-                            id: *id,
-                            username: username.clone(),
-                            is_inactive: true,
-                            kind: UpdatePresenceKind::Boring,
-                        })
-                        .unwrap();
+                    if let Err(err) = ui_tx.try_send(UICommand::PresenceUpdate {
+                        id: *id,
+                        username: username.clone(),
+                        is_inactive: true,
+                        kind: UpdatePresenceKind::Boring,
+                    }) {
+                        log::error!(
+                            "After sending Heartbeat PresenceUpdate: {}",
+                            err.to_string()
+                        );
+                    }
                 }
             }
 
