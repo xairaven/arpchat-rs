@@ -50,7 +50,7 @@ pub enum UICommand {
 }
 
 pub fn alert_user() {
-    // Ringing dat bell
+    // Ringing bell
     use std::io::{stdout, Write};
     print!("\x07");
     let _ = stdout().flush();
@@ -60,9 +60,17 @@ pub fn send_message(
     message_text: String, siv: &mut Cursive, net_tx: &Sender<NetCommand>,
 ) {
     if message_text.eq("/offline") {
-        let _ = net_tx.try_send(NetCommand::PauseHeartbeat(true));
+        net_tx
+            .try_send(NetCommand::PauseHeartbeat(true))
+            .unwrap_or_else(|err| {
+                log::error!("Error sending PauseHeartbeat with /offline: {}", err);
+            });
     } else if message_text.eq("/online") {
-        let _ = net_tx.try_send(NetCommand::PauseHeartbeat(false));
+        net_tx
+            .try_send(NetCommand::PauseHeartbeat(false))
+            .unwrap_or_else(|err| {
+                log::error!("Error sending PauseHeartbeat with /online: {}", err);
+            });
     } else if !message_text.is_empty() {
         let result = net_tx.try_send(NetCommand::SendMessage { message_text });
 
