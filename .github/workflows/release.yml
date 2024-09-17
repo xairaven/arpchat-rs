@@ -63,9 +63,6 @@ jobs:
         with:
           path: .
 
-      - name: ls -la
-        run: ls -la
-
       - name: Create release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
