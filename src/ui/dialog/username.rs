@@ -1,6 +1,6 @@
 use crate::ui;
 use crate::ui::commands::UICommand;
-use crate::{config, session};
+use crate::{config, session_settings};
 use crossbeam::channel::{Sender, TrySendError};
 use cursive::view::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView};
@@ -17,7 +17,7 @@ pub fn show_input_dialog(
                 .on_submit({
                     let ui_tx = ui_tx.clone();
                     move |siv, username| {
-                        let username = session::normalize_username(username);
+                        let username = session_settings::normalize_username(username);
 
                         let result =
                             ui_tx.try_send(UICommand::SetUsername(username.to_owned()));
@@ -30,7 +30,7 @@ pub fn show_input_dialog(
                         );
                     }
                 })
-                .max_content_width(session::MAX_USERNAME_LENGTH)
+                .max_content_width(session_settings::MAX_USERNAME_LENGTH)
                 .with_name("username_input"),
         )
         .button(t!("button.save"), move |siv| {
@@ -39,7 +39,7 @@ pub fn show_input_dialog(
                     input.get_content()
                 })
                 .unwrap();
-            let username = session::normalize_username(username.as_str());
+            let username = session_settings::normalize_username(username.as_str());
 
             let result = ui_tx.try_send(UICommand::SetUsername(username.to_string()));
 

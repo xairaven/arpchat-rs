@@ -2,6 +2,9 @@ pub const INITIAL_USERNAME: &str = "Anonymous";
 pub const MAX_USERNAME_LENGTH: usize = 25;
 pub const MIN_USERNAME_LENGTH: usize = 2;
 
+// Username for offline users that send messages
+pub const UNKNOWN_USERNAME: &str = "Unknown";
+
 pub fn normalize_username(username: &str) -> String {
     let mut result = username.to_string();
 

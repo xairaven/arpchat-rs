@@ -7,10 +7,11 @@ use crate::net::presence::{
     UpdatePresenceKind, HEARTBEAT_INTERVAL, INACTIVE_TIMEOUT, OFFLINE_TIMEOUT,
 };
 use crate::net::{interface, ktp};
-use crate::session;
+use crate::session_settings;
 use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
 use std::collections::{HashMap, HashSet};
+use std::process;
 use std::time::Instant;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -20,14 +21,11 @@ enum NetThreadState {
     Ready,
 }
 
-// Username for offline users that send messages
-pub const UNKNOWN_USERNAME: &str = "Unknown";
-
 pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     log::info!("Net thread started.");
 
     let session_id = ktp::generate_id();
-    let mut session_username = String::from(session::INITIAL_USERNAME);
+    let mut session_username = String::from(session_settings::INITIAL_USERNAME);
 
     let mut last_heartbeat = Instant::now();
     let mut online: HashMap<ktp::Id, (Instant, String)> = HashMap::new();
@@ -36,24 +34,24 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
     let mut state = NetThreadState::NeedsUsername;
     let mut pause_heartbeat = false;
 
-    let channel: Option<Channel>;
+    let mut channel: Channel;
 
     log::info!("Interface loop started.");
     loop {
         match net_rx.try_recv() {
             Ok(NetCommand::SetInterface { interface_name }) => {
                 let result = interface::channel_from_name(interface_name);
-                if let Err(err) = result {
-                    log::error!("{}", err.to_string());
-                    send_net_error_to_ui(&ui_tx, err);
-
-                    continue;
+                match result {
+                    Ok(value) => {
+                        channel = value;
+                        log::info!("Net channel created");
+                        break;
+                    },
+                    Err(err) => {
+                        log::error!("{}", err.to_string());
+                        process::exit(1);
+                    },
                 }
-
-                channel = result.ok();
-                log::info!("Net channel created");
-
-                break;
             },
             Ok(NetCommand::Terminate) => {
                 log::info!("Net Command: Terminate before setting interface.");
@@ -64,38 +62,35 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
         }
     }
 
-    // Checked in previous loop
-    let mut channel = channel.unwrap();
-
     log::info!("Net Thread loop started.");
     loop {
         match net_rx.try_recv() {
             Ok(NetCommand::PauseHeartbeat(pause)) => {
-                log::info!("Net Command: Pause Heartbeat called. Value = {pause}");
+                log::info!("Net Command: Pause Heartbeat. Value = {pause}");
                 pause_heartbeat = pause
             },
             Ok(NetCommand::SendMessage { message_text }) => {
-                log::info!("Net Command: Send Message called.");
+                log::info!("Net Command: Send Message. Message: {message_text}");
 
-                ui_tx
-                    .try_send(UICommand::ShowMessage {
-                        id: session_id,
-                        username: session_username.clone(),
-                        message: message_text.clone(),
-                        is_outgoing_message: true,
-                    })
-                    .unwrap();
+                let result = ui_tx.try_send(UICommand::ShowMessage {
+                    id: session_id,
+                    username: session_username.clone(),
+                    message: message_text.clone(),
+                    is_outgoing_message: true,
+                });
+                if let Err(err) = result {
+                    log::error!("{}", err.to_string());
+                }
 
                 let result = channel.try_send(Packet::Message {
                     id: session_id,
                     message_text,
                 });
-
-                log::debug!("Net Command: Sent packet!");
-
                 if let Err(err) = result {
                     log::error!("{}", err.to_string());
                     send_net_error_to_ui(&ui_tx, err);
+                } else {
+                    log::debug!("Net Command: Sent packet!");
                 }
             },
             Ok(NetCommand::SetInterface { .. }) => {
@@ -109,18 +104,20 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 channel.set_ether_type(ether_type);
             },
             Ok(NetCommand::Terminate) => {
-                log::info!("Net Command: Terminate...");
+                log::info!("Net Command: Terminate.");
 
                 let _ = channel.try_send(Packet::Disconnect(session_id));
                 break;
             },
             Ok(NetCommand::UpdateUsername(new_username)) => {
-                log::info!("Net Command: Update username.");
+                log::info!("Net Command: Update username: {new_username}");
 
                 session_username = new_username;
 
                 if state == NetThreadState::NeedsUsername {
-                    channel.try_send(Packet::PresenceBroadcastRequest).unwrap();
+                    if let Err(err) = channel.try_send(Packet::PresenceBroadcastRequest) {
+                        log::error!("{}", err.to_string());
+                    }
                     state = NeedsInitialPresence;
                 }
             },
@@ -141,7 +138,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
                 let username = match online.get(&id) {
                     Some((_, username)) => username.clone(),
-                    None => UNKNOWN_USERNAME.to_string(),
+                    None => session_settings::UNKNOWN_USERNAME.to_string(),
                 };
 
                 // Alerting user if there's username in message
@@ -149,14 +146,12 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     let _ = ui_tx.try_send(UICommand::AlertUser);
                 }
 
-                ui_tx
-                    .try_send(UICommand::ShowMessage {
-                        id,
-                        username,
-                        message: message_text,
-                        is_outgoing_message: false,
-                    })
-                    .unwrap();
+                let _ = ui_tx.try_send(UICommand::ShowMessage {
+                    id,
+                    username,
+                    message: message_text,
+                    is_outgoing_message: false,
+                });
             },
             Some(Packet::PresenceBroadcastRequest) => {
                 log::debug!("Channel: Presence Broadcast Request received.");
@@ -168,7 +163,9 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     username: session_username.clone(),
                 };
 
-                channel.try_send(packet).unwrap();
+                if let Err(e) = channel.try_send(packet) {
+                    log::error!("After sending PresenceInformation: {}", e.to_string());
+                }
             },
             Some(Packet::PresenceInformation {
                 id: some_id,
@@ -178,18 +175,23 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 log::debug!("Channel: Presence Information packet received.");
 
                 match online.insert(some_id, (Instant::now(), username.clone())) {
-                    Some((_, previous_username)) => ui_tx
-                        .try_send(UICommand::PresenceUpdate {
+                    Some((_, previous_username)) => {
+                        if let Err(err) = ui_tx.try_send(UICommand::PresenceUpdate {
                             id: some_id,
                             username,
                             is_inactive: false,
                             kind: UpdatePresenceKind::UsernameChange {
                                 previous_username,
                             },
-                        })
-                        .unwrap(),
-                    None => ui_tx
-                        .try_send(UICommand::PresenceUpdate {
+                        }) {
+                            log::error!(
+                                "After sending PresenceUpdate packet: {}",
+                                err.to_string()
+                            );
+                        }
+                    },
+                    None => {
+                        if let Err(err) = ui_tx.try_send(UICommand::PresenceUpdate {
                             id: some_id,
                             username,
                             is_inactive: false,
@@ -198,8 +200,13 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                             } else {
                                 UpdatePresenceKind::Boring
                             },
-                        })
-                        .unwrap(),
+                        }) {
+                            log::error!(
+                                "After sending PresenceUpdate packet: {}",
+                                err.to_string()
+                            );
+                        }
+                    },
                 }
 
                 if some_id == session_id {
@@ -210,12 +217,15 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                 log::debug!("Channel: Disconnection packet received.");
 
                 if let Some((_, username)) = online.remove(&some_id) {
-                    ui_tx
-                        .try_send(UICommand::RemovePresence {
-                            id: some_id,
-                            username,
-                        })
-                        .unwrap();
+                    if let Err(err) = ui_tx.try_send(UICommand::RemovePresence {
+                        id: some_id,
+                        username,
+                    }) {
+                        log::error!(
+                            "After sending Disconnect packet: {}",
+                            err.to_string()
+                        );
+                    }
                 }
             },
         }

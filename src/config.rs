@@ -1,6 +1,6 @@
 use crate::error::config::ConfigError;
 use crate::net::ether_type::EtherType;
-use crate::session;
+use crate::session_settings;
 use directories::ProjectDirs;
 use log::LevelFilter;
 use once_cell::sync::Lazy;
@@ -50,10 +50,10 @@ impl Config {
         let mut username = self.username.clone().unwrap_or_else(Self::get_hostname);
 
         if username.is_empty() {
-            username = session::INITIAL_USERNAME.to_string()
+            username = session_settings::INITIAL_USERNAME.to_string()
         };
 
-        Some(session::normalize_username(&username))
+        Some(session_settings::normalize_username(&username))
     }
 
     fn get_hostname() -> String {
@@ -141,5 +141,5 @@ pub fn lock_get_username() -> String {
         .try_lock()
         .ok()
         .and_then(|locked_config| locked_config.get_username())
-        .unwrap_or(session::INITIAL_USERNAME.to_string())
+        .unwrap_or(session_settings::INITIAL_USERNAME.to_string())
 }

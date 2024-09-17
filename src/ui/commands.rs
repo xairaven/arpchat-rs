@@ -4,7 +4,7 @@ use crate::net::commands::NetCommand;
 use crate::net::ether_type::EtherType;
 use crate::net::ktp;
 use crate::net::presence::UpdatePresenceKind;
-use crate::{session, ui};
+use crate::{session_settings, ui};
 use chrono::Timelike;
 use crossbeam::channel::Sender;
 use cursive::backends::crossterm::crossterm::style::Stylize;
@@ -145,7 +145,7 @@ pub fn set_username(
         return;
     }
 
-    let username = session::normalize_username(&new_username);
+    let username = session_settings::normalize_username(&new_username);
 
     if let Ok(mut config) = CONFIG.try_lock() {
         config.username = Some(new_username.clone());

@@ -2,7 +2,7 @@ use crate::config::CONFIG;
 use crate::net::commands::NetCommand;
 use crate::ui::commands::UICommand;
 use crate::ui::dialog;
-use crate::{net, session, ui};
+use crate::{net, session_settings, ui};
 use crossbeam::channel::unbounded;
 use cursive::Cursive;
 use std::thread;
@@ -12,7 +12,7 @@ pub fn start() {
     let (net_tx, net_rx) = unbounded::<NetCommand>();
     log::info!("Main UI and Net channels created.");
 
-    let mut ui_thread_username = String::from(session::INITIAL_USERNAME);
+    let mut ui_thread_username = String::from(session_settings::INITIAL_USERNAME);
 
     let net_thread = thread::Builder::new()
         .name("Net Thread".to_string())
