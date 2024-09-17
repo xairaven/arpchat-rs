@@ -10,7 +10,7 @@ use cursive::views::{
 use cursive::{menu, Cursive};
 
 pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
-    const AUTOHIDE_MENU: bool = false;
+    const AUTO_HIDE_MENU: bool = false;
     let initial_username = config::lock_get_username();
 
     siv.menubar()
@@ -59,7 +59,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
         .add_leaf(t!("menu.help"), show_help_dialog)
         .add_delimiter()
         .add_leaf(t!("menu.quit"), ui::core::quit);
-    siv.set_autohide_menu(AUTOHIDE_MENU);
+    siv.set_autohide_menu(AUTO_HIDE_MENU);
     siv.add_global_callback(Key::Esc, |siv| siv.select_menubar());
 
     siv.add_fullscreen_layer(
