@@ -185,7 +185,12 @@ pub fn show_message(
 
     let print = markup::ansi::parse(print);
 
-    ui::view_updater::update_or_append_txt(siv, "chat_area", &message, print);
+    ui::view_updater::update_or_append_txt(
+        siv,
+        ui::main_window::ELEMENT_NAME_CHAT_AREA,
+        &message,
+        print,
+    );
     if !is_outgoing_message {
         siv.call_on_name(&message, |child: &mut NamedView<TextView>| {
             child.set_name("");
@@ -207,7 +212,7 @@ pub fn presence_update(
 
             ui::view_updater::append_txt(
                 siv,
-                "chat_area",
+                ui::main_window::ELEMENT_NAME_CHAT_AREA,
                 markup::ansi::parse(translated.dark_grey().to_string()),
             );
         },
@@ -227,7 +232,7 @@ pub fn presence_update(
 
             ui::view_updater::append_txt(
                 siv,
-                "chat_area",
+                ui::main_window::ELEMENT_NAME_CHAT_AREA,
                 markup::ansi::parse(translated.dark_grey().to_string()),
             );
         },
@@ -237,7 +242,7 @@ pub fn presence_update(
     // Update username in presences list.
     ui::view_updater::update_or_append_txt(
         siv,
-        "online_panel",
+        ui::main_window::ELEMENT_NAME_ONLINE_PANEL,
         &format!("{id:x?}_presence"),
         match is_inactive {
             true => markup::ansi::parse(format!("- {username}").dark_grey().to_string()),
@@ -258,14 +263,17 @@ pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
 
     ui::view_updater::append_txt(
         siv,
-        "chat_area",
+        ui::main_window::ELEMENT_NAME_CHAT_AREA,
         markup::ansi::parse(translated.dark_grey().to_string()),
     );
 
     // Remove from presences list.
-    siv.call_on_name("online_panel", |presences: &mut LinearLayout| {
-        presences
-            .find_child_from_name(&format!("{id:x?}_presence"))
-            .map(|presence| presences.remove_child(presence));
-    });
+    siv.call_on_name(
+        ui::main_window::ELEMENT_NAME_ONLINE_PANEL,
+        |presences: &mut LinearLayout| {
+            presences
+                .find_child_from_name(&format!("{id:x?}_presence"))
+                .map(|presence| presences.remove_child(presence));
+        },
+    );
 }

@@ -7,6 +7,9 @@ use cursive::views::{Dialog, EditView, LinearLayout, Panel, SelectView, TextView
 use cursive::Cursive;
 use log::LevelFilter;
 
+pub const ELEMENT_NAME_LOG_FILENAME_INPUT: &str = "settings_log_filename_input";
+pub const ELEMENT_NAME_LOG_LEVEL_SELECTOR: &str = "settings_log_level_selector";
+
 pub fn show_settings_log_level(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     let config_log_level_index = LevelFilter::iter()
         .position(|level| level.eq(&config::lock_get_log_level()))
@@ -40,7 +43,7 @@ pub fn show_settings_log_level(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                                     }
                                 }
                             })
-                            .with_name("settings_log_level_selector"),
+                            .with_name(ELEMENT_NAME_LOG_LEVEL_SELECTOR),
                     ))
                     .child(TextView::new(t!("text.changes_restart_needed"))),
             )
@@ -49,7 +52,7 @@ pub fn show_settings_log_level(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                 move |siv| {
                     let index = siv
                         .call_on_name(
-                            "settings_log_level_selector",
+                            ELEMENT_NAME_LOG_LEVEL_SELECTOR,
                             |input: &mut SelectView| input.selected_id().unwrap(),
                         )
                         .unwrap();
@@ -84,14 +87,14 @@ pub fn show_settings_log_filename(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                     .child(
                         EditView::new()
                             .content(config_log_filename)
-                            .with_name("settings_log_filename_input"),
+                            .with_name(ELEMENT_NAME_LOG_FILENAME_INPUT),
                     )
                     .child(TextView::new(t!("text.changes_restart_needed"))),
             )
             .button(t!("button.save"), move |siv| {
                 let file_name = siv
                     .call_on_name(
-                        "settings_log_filename_input",
+                        ELEMENT_NAME_LOG_FILENAME_INPUT,
                         |input: &mut EditView| input.get_content(),
                     )
                     .unwrap();

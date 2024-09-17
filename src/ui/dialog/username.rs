@@ -6,6 +6,8 @@ use cursive::view::{Nameable, Resizable};
 use cursive::views::{Dialog, EditView};
 use cursive::Cursive;
 
+pub const ELEMENT_NAME_USERNAME_INPUT: &str = "username_input";
+
 pub fn show_input_dialog(
     siv: &mut Cursive, ui_tx: Sender<UICommand>, main_initialized: bool,
 ) {
@@ -31,11 +33,11 @@ pub fn show_input_dialog(
                     }
                 })
                 .max_content_width(session_settings::MAX_USERNAME_LENGTH)
-                .with_name("username_input"),
+                .with_name(ELEMENT_NAME_USERNAME_INPUT),
         )
         .button(t!("button.save"), move |siv| {
             let username = siv
-                .call_on_name("username_input", |input: &mut EditView| {
+                .call_on_name(ELEMENT_NAME_USERNAME_INPUT, |input: &mut EditView| {
                     input.get_content()
                 })
                 .unwrap();

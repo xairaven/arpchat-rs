@@ -9,6 +9,11 @@ use cursive::views::{
 };
 use cursive::{menu, Cursive};
 
+pub const ELEMENT_NAME_CHAT_AREA: &str = "chat_area";
+pub const ELEMENT_NAME_CHAT_INPUT: &str = "chat_input";
+pub const ELEMENT_NAME_CHAT_PANEL: &str = "chat_panel";
+pub const ELEMENT_NAME_ONLINE_PANEL: &str = "online_panel";
+
 pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
     const AUTO_HIDE_MENU: bool = false;
     let initial_username = config::lock_get_username();
@@ -69,14 +74,14 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                     .child(
                         Panel::new(
                             LinearLayout::vertical()
-                                .with_name("chat_area")
+                                .with_name(ELEMENT_NAME_CHAT_AREA)
                                 .full_height()
                                 .full_width()
                                 .scrollable()
                                 .scroll_strategy(ScrollStrategy::StickToBottom),
                         )
                         .title(format!("arpchat: {initial_username}"))
-                        .with_name("chat_panel")
+                        .with_name(ELEMENT_NAME_CHAT_PANEL)
                         .full_height()
                         .full_width(),
                     )
@@ -85,7 +90,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                             EditView::new()
                                 .on_submit(move |siv, msg| {
                                     siv.call_on_name(
-                                        "chat_input",
+                                        ELEMENT_NAME_CHAT_INPUT,
                                         |input: &mut EditView| {
                                             input.set_content("");
                                         },
@@ -102,7 +107,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                                         );
                                     }
                                 })
-                                .with_name("chat_input"),
+                                .with_name(ELEMENT_NAME_CHAT_INPUT),
                         )
                         .full_width(),
                     )
@@ -111,7 +116,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
             .child(
                 Panel::new(
                     LinearLayout::vertical()
-                        .with_name("online_panel")
+                        .with_name(ELEMENT_NAME_ONLINE_PANEL)
                         .full_height()
                         .full_width()
                         .scrollable()
@@ -131,7 +136,7 @@ pub fn update_username_title(siv: &mut Cursive, username: &str) {
     type ChatPanel = Panel<ScrollView<ResizedView<ResizedView<NamedView<LinearLayout>>>>>;
 
     siv.set_window_title(&title);
-    siv.call_on_name("chat_panel", |chat_panel: &mut ChatPanel| {
+    siv.call_on_name(ELEMENT_NAME_CHAT_PANEL, |chat_panel: &mut ChatPanel| {
         chat_panel.set_title(title);
     });
 }
