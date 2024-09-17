@@ -100,9 +100,11 @@ pub fn show_settings_log_filename(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
 
                 match result {
                     Ok(_) => {
-                        ui_tx
+                        if let Err(err) = ui_tx
                             .try_send(UICommand::SetLogFileName(file_name.to_string()))
-                            .unwrap();
+                        {
+                            ui::dialog::error::show_try_again(siv, err)
+                        };
                         siv.pop_layer();
                     },
                     Err(err) => ui::dialog::error::show_try_again(siv, err),
