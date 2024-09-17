@@ -177,7 +177,7 @@ pub fn show_message(
 
     let print = markup::ansi::parse(print);
 
-    ui::cursive_extension::update_or_append_txt(siv, "chat_area", &message, print);
+    ui::view_updater::update_or_append_txt(siv, "chat_area", &message, print);
     if !is_outgoing_message {
         siv.call_on_name(&message, |child: &mut NamedView<TextView>| {
             child.set_name("");
@@ -197,7 +197,7 @@ pub fn presence_update(
                 &[username.clone()],
             );
 
-            ui::cursive_extension::append_txt(
+            ui::view_updater::append_txt(
                 siv,
                 "chat_area",
                 markup::ansi::parse(translated.dark_grey().to_string()),
@@ -217,7 +217,7 @@ pub fn presence_update(
                 &[previous_username],
             );
 
-            ui::cursive_extension::append_txt(
+            ui::view_updater::append_txt(
                 siv,
                 "chat_area",
                 markup::ansi::parse(translated.dark_grey().to_string()),
@@ -227,7 +227,7 @@ pub fn presence_update(
     }
 
     // Update username in presences list.
-    ui::cursive_extension::update_or_append_txt(
+    ui::view_updater::update_or_append_txt(
         siv,
         "online_panel",
         &format!("{id:x?}_presence"),
@@ -248,7 +248,7 @@ pub fn remove_presence(id: ktp::Id, username: String, siv: &mut Cursive) {
         &[username.clone()],
     );
 
-    ui::cursive_extension::append_txt(
+    ui::view_updater::append_txt(
         siv,
         "chat_area",
         markup::ansi::parse(translated.dark_grey().to_string()),
