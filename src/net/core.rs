@@ -129,7 +129,7 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
 
         let result_recv_packet = channel.try_recv();
         if let Err(err) = result_recv_packet {
-            log::error!("{}", NetError::InterfaceAlreadySet.to_string());
+            log::error!("Channel recv error: {}", err.to_string());
             send_net_error_to_ui(&ui_tx, err);
             break;
         }

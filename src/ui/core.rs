@@ -117,11 +117,11 @@ pub fn start() {
             }
 
             event_loop.refresh();
-            log::debug!("Event loop refreshed.");
+            log::trace!("Event loop refreshed.");
         }
 
         event_loop.step();
-        log::debug!("Event loop step.");
+        log::trace!("Event loop step.");
     }
 
     net_tx.try_send(NetCommand::Terminate).unwrap();
