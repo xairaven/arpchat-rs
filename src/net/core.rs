@@ -11,7 +11,6 @@ use crate::session_settings;
 use crate::ui::commands::UICommand;
 use crossbeam::channel::{Receiver, Sender, TrySendError};
 use std::collections::{HashMap, HashSet};
-use std::process;
 use std::time::Instant;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -49,7 +48,8 @@ pub fn start(ui_tx: Sender<UICommand>, net_rx: Receiver<NetCommand>) {
                     },
                     Err(err) => {
                         log::error!("{}", err.to_string());
-                        process::exit(1);
+                        let _ = ui_tx.try_send(UICommand::SendNetError(err));
+                        return;
                     },
                 }
             },

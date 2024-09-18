@@ -50,7 +50,8 @@ pub fn start() {
                 },
                 UICommand::SendNetError(err) => {
                     log::error!("UI Command: Net error. {}", err);
-                    dialog::error::show_try_again(&mut event_loop, err);
+                    dialog::error::show(&mut event_loop, err);
+                    break;
                 },
                 UICommand::SendMessage { message_text } => {
                     log::info!("UI Command: Send message: {message_text}");
