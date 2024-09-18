@@ -24,3 +24,11 @@ pub fn show(siv: &mut Cursive, err: impl fmt::Display) {
             .button(t!("button.quit"), ui::core::quit),
     );
 }
+
+pub fn show_breaking(siv: &mut Cursive, err: impl fmt::Display) {
+    siv.add_layer(
+        Dialog::text(err.to_string())
+            .title(t!("title.error"))
+            .button(t!("button.quit"), ui::core::quit),
+    );
+}
