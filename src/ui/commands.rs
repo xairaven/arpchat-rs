@@ -9,12 +9,16 @@ use chrono::Timelike;
 use crossbeam::channel::Sender;
 use cursive::backends::crossterm::crossterm::style::Stylize;
 use cursive::utils::markup;
-use cursive::views::{LinearLayout, NamedView, TextView};
+use cursive::views::{Dialog, LinearLayout, NamedView, TextView};
 use cursive::Cursive;
 use log::LevelFilter;
+use std::fs::File;
+use std::io::Write;
 
 pub enum UICommand {
     AlertUser,
+
+    ExportMessages(File),
 
     SendNetError(NetError),
 
@@ -54,6 +58,68 @@ pub fn alert_user() {
     use std::io::{stdout, Write};
     print!("\x07");
     let _ = stdout().flush();
+}
+
+pub fn export_messages(siv: &mut Cursive, mut file: File) {
+    let mut success = false;
+
+    siv.call_on_name(
+        ui::main_window::ELEMENT_NAME_CHAT_AREA,
+        |chat_area: &mut LinearLayout| {
+            let mut buffer = String::new();
+
+            let mut counter = 0;
+            loop {
+                match chat_area.get_child_mut(counter) {
+                    None => break,
+                    Some(child) => {
+                        let result_downcasting = child.downcast_ref::<TextView>();
+                        if let Some(&ref text_view) = result_downcasting {
+                            let content = text_view.get_content();
+                            let raw_text = content.source();
+                            let parsed = markup::ansi::parse(raw_text).into_source();
+                            buffer.push_str(format!("{}\n", parsed).as_str());
+
+                            counter += 1;
+                            continue;
+                        }
+
+                        let result_downcasting =
+                            child.downcast_mut::<NamedView<TextView>>();
+                        if let Some(&mut ref mut named_text_view) = result_downcasting {
+                            let text_view = named_text_view.get_mut();
+                            let content = text_view.get_content();
+                            let raw_text = content.source();
+                            let parsed = markup::ansi::parse(raw_text).into_source();
+                            buffer.push_str(format!("{}\n", parsed).as_str());
+                        } else {
+                            log::warn!("Exporting chat, found undefined type!");
+                        }
+
+                        counter += 1;
+                    },
+                }
+            }
+
+            let result = file.write_all(buffer.as_bytes());
+            if let Err(err) = result {
+                log::error!("Error writing file while exporting chat: {}", err);
+            } else {
+                log::info!("Chat exported successfully!");
+                success = true;
+            }
+        },
+    );
+
+    if success {
+        siv.pop_layer();
+        siv.add_layer(Dialog::text(t!("text.chat_export.success")).button(
+            t!("button.close"),
+            |siv| {
+                siv.pop_layer();
+            },
+        ));
+    }
 }
 
 pub fn send_message(

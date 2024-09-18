@@ -2,12 +2,14 @@
   "_version": 1,
 
   "button.close": "Close",
+  "button.export": "Export",
   "button.ok": "OK",
   "button.save": "Save",
   "button.try_again": "Try again",
   "button.quit": "Quit",
 
   "menu.change_username": "Change username",
+  "menu.export_messages": "Export Chat",
   "menu.help": "Help",
   "menu.log_filename": "Log Filename",
   "menu.log_level": "Log Level",
@@ -15,6 +17,7 @@
   "menu.switch_protocol": "Switch Protocol",
   "menu.quit": "Quit",
 
+  "text.chat_export.success": "Chat exported successfully!",
   "text.ether_types": "Experimental versions 1 and 2 are more standards-compliant and generally more considerate towards other devices.\nIPv4 might offer better reliability on some networks.\n\n",
   "text.help": "Change window section - Tab\nMove around the window - arrows\nSwitch to menu - Esc",
   "text.changes_restart_needed": "To apply the changes, you must restart the program.",
@@ -24,6 +27,7 @@
   "text.user_disconnected": "> %{username} disconnected, bye!",
 
   "title.error": "Error!",
+  "title.export_messages": "Export Chat",
   "title.help": "Help",
   "title.interface_selection": "Select an Interface",
   "title.language_selection": "Select a Language",

@@ -7,6 +7,7 @@ pub mod view_updater;
 pub mod dialog {
     pub mod error;
     pub mod ether_type;
+    pub mod export_messages;
     pub mod interface;
     pub mod localization;
     pub mod logger_settings;

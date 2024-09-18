@@ -2,12 +2,14 @@
   "_version": 1,
 
   "button.close": "Закрити",
+  "button.export": "Експорт",
   "button.ok": "Зрозуміло!",
   "button.save": "Зберегти",
   "button.try_again": "Спробувати ще раз",
   "button.quit": "Вихід",
 
   "menu.change_username": "Змінити нікнейм",
+  "menu.export_messages": "Експортувати чат",
   "menu.help": "Довідка",
   "menu.log_filename": "Логування: назва журналу",
   "menu.log_level": "Логування: рівень",
@@ -15,6 +17,7 @@
   "menu.switch_protocol": "Змінити протокол",
   "menu.quit": "Вихід",
 
+  "text.chat_export.success": "Чат був успішно експортований!",
   "text.ether_types": "Експериментальні протоколи EtherType 1 і 2 більш відповідають стандартам і, як правило, більш безпечні по відношенню до інших пристроїв.\nАле, IPv4 може бути надійнішим.\n\n",
   "text.help": "Змінити секцію вікна - Tab\nПереміщення по елементу - стрілки\nПеремикання на меню - Esc",
   "text.changes_restart_needed": "Для застосування можливих змін треба перезавантажити програму.",
@@ -24,6 +27,7 @@
   "text.user_disconnected": "> %{username} відключився, бувай!",
 
   "title.error": "Помилка!",
+  "title.export_messages": "Експортувати чат",
   "title.help": "Довідка",
   "title.interface_selection": "Оберіть інтерфейс",
   "title.language_selection": "Оберіть мову",

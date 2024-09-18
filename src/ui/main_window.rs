@@ -37,7 +37,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                 .leaf(t!("menu.switch_protocol"), {
                     let ui_tx = ui_tx.clone();
                     move |siv| {
-                        ui::dialog::ether_type::show_select_dialog(siv, ui_tx.clone())
+                        ui::dialog::ether_type::show_select_dialog(siv, ui_tx.clone());
                     }
                 })
                 .delimiter()
@@ -47,7 +47,7 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                         ui::dialog::logger_settings::show_settings_log_filename(
                             siv,
                             ui_tx.clone(),
-                        )
+                        );
                     }
                 })
                 .leaf(t!("menu.log_level"), {
@@ -56,7 +56,13 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                         ui::dialog::logger_settings::show_settings_log_level(
                             siv,
                             ui_tx.clone(),
-                        )
+                        );
+                    }
+                })
+                .leaf(t!("menu.export_messages"), {
+                    let ui_tx = ui_tx.clone();
+                    move |siv| {
+                        ui::dialog::export_messages::show_dialog(siv, ui_tx.clone());
                     }
                 }),
         )

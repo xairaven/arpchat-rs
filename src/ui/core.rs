@@ -44,6 +44,10 @@ pub fn start() {
                     log::info!("UI Command: Alert User.");
                     ui::commands::alert_user()
                 },
+                UICommand::ExportMessages(file) => {
+                    log::info!("UI Command: Export Dialog.");
+                    ui::commands::export_messages(&mut event_loop, file);
+                },
                 UICommand::SendNetError(err) => {
                     log::error!("UI Command: Net error. {}", err);
                     dialog::error::show_try_again(&mut event_loop, err);
