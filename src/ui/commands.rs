@@ -61,7 +61,7 @@ pub fn alert_user() {
 }
 
 pub fn export_messages(siv: &mut Cursive, mut file: File) {
-    let mut success = false;
+    let mut is_write_success = false;
 
     siv.call_on_name(
         ui::main_window::ELEMENT_NAME_CHAT_AREA,
@@ -74,24 +74,26 @@ pub fn export_messages(siv: &mut Cursive, mut file: File) {
                     None => break,
                     Some(child) => {
                         let result_downcasting = child.downcast_ref::<TextView>();
-                        if let Some(&ref text_view) = result_downcasting {
+                        if let Some(text_view) = result_downcasting {
                             let content = text_view.get_content();
                             let raw_text = content.source();
-                            let parsed = markup::ansi::parse(raw_text).into_source();
-                            buffer.push_str(format!("{}\n", parsed).as_str());
+                            let mut parsed = markup::ansi::parse(raw_text);
+                            parsed.canonicalize();
+                            buffer.push_str(format!("{}\n", parsed.source()).as_str());
 
                             counter += 1;
                             continue;
                         }
 
-                        let result_downcasting =
+                        let mut result_downcasting =
                             child.downcast_mut::<NamedView<TextView>>();
-                        if let Some(&mut ref mut named_text_view) = result_downcasting {
+                        if let Some(ref mut named_text_view) = result_downcasting {
                             let text_view = named_text_view.get_mut();
                             let content = text_view.get_content();
                             let raw_text = content.source();
-                            let parsed = markup::ansi::parse(raw_text).into_source();
-                            buffer.push_str(format!("{}\n", parsed).as_str());
+                            let mut parsed = markup::ansi::parse(raw_text);
+                            parsed.canonicalize();
+                            buffer.push_str(format!("{}\n", parsed.source()).as_str());
                         } else {
                             log::warn!("Exporting chat, found undefined type!");
                         }
@@ -106,12 +108,12 @@ pub fn export_messages(siv: &mut Cursive, mut file: File) {
                 log::error!("Error writing file while exporting chat: {}", err);
             } else {
                 log::info!("Chat exported successfully!");
-                success = true;
+                is_write_success = true;
             }
         },
     );
 
-    if success {
+    if is_write_success {
         siv.pop_layer();
         siv.add_layer(Dialog::text(t!("text.chat_export.success")).button(
             t!("button.close"),
