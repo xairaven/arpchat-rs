@@ -17,7 +17,7 @@ fn main() {
         &config::lock_get_log_filename(),
     )
     .unwrap_or_else(|err| {
-        log::error!("Error: {err}");
+        println!("Logger initialization failed. Error: {}", err);
         std::process::exit(1);
     });
 
