@@ -69,10 +69,6 @@ pub fn start() {
                     log::info!("UI Command: Set Language: {language}");
                     ui::commands::set_language(language);
                 },
-                UICommand::SetLogFileName(file_name) => {
-                    log::info!("UI Command: Set Log File: {file_name}");
-                    ui::commands::set_log_file_name(file_name);
-                },
                 UICommand::SetLogLevel(level) => {
                     log::info!("UI Command: Set Log Level: {level}");
                     ui::commands::set_log_level(level);

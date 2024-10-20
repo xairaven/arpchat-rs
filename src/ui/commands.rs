@@ -29,7 +29,6 @@ pub enum UICommand {
     SetEtherType(EtherType),
     SetInterface(String),
     SetLanguage(String),
-    SetLogFileName(String),
     SetLogLevel(LevelFilter),
     SetUsername(String),
 
@@ -187,13 +186,6 @@ pub fn set_language(language: String) {
 
     if let Ok(mut config) = CONFIG.try_lock() {
         config.language = Some(language);
-        config.save().unwrap_or_default();
-    }
-}
-
-pub fn set_log_file_name(file_name: String) {
-    if let Ok(mut config) = CONFIG.try_lock() {
-        config.log_filename = Some(file_name);
         config.save().unwrap_or_default();
     }
 }

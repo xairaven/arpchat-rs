@@ -3,11 +3,10 @@ use crate::{config, ui};
 use crossbeam::channel::Sender;
 use cursive::traits::Resizable;
 use cursive::view::Nameable;
-use cursive::views::{Dialog, EditView, LinearLayout, Panel, SelectView, TextView};
+use cursive::views::{Dialog, LinearLayout, Panel, SelectView, TextView};
 use cursive::Cursive;
 use log::LevelFilter;
 
-pub const ELEMENT_NAME_LOG_FILENAME_INPUT: &str = "settings_log_filename_input";
 pub const ELEMENT_NAME_LOG_LEVEL_SELECTOR: &str = "settings_log_level_selector";
 
 pub fn show_settings_log_level(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
@@ -67,50 +66,6 @@ pub fn show_settings_log_level(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                         },
                         Err(err) => ui::dialog::error::show_try_again(siv, err),
                     }
-                }
-            })
-            .button(t!("button.close"), |siv| {
-                siv.pop_layer();
-            })
-            .min_width(32)
-            .max_width(56),
-    );
-}
-pub fn show_settings_log_filename(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
-    let config_log_filename: String = config::lock_get_log_filename();
-
-    siv.add_layer(
-        Dialog::new()
-            .title(t!("title.log_filename"))
-            .content(
-                LinearLayout::vertical()
-                    .child(
-                        EditView::new()
-                            .content(config_log_filename)
-                            .with_name(ELEMENT_NAME_LOG_FILENAME_INPUT),
-                    )
-                    .child(TextView::new(t!("text.changes_restart_needed"))),
-            )
-            .button(t!("button.save"), move |siv| {
-                let file_name = siv
-                    .call_on_name(
-                        ELEMENT_NAME_LOG_FILENAME_INPUT,
-                        |input: &mut EditView| input.get_content(),
-                    )
-                    .unwrap();
-
-                let result = fern::log_file(file_name.as_str());
-
-                match result {
-                    Ok(_) => {
-                        if let Err(err) = ui_tx
-                            .try_send(UICommand::SetLogFileName(file_name.to_string()))
-                        {
-                            ui::dialog::error::show_try_again(siv, err)
-                        };
-                        siv.pop_layer();
-                    },
-                    Err(err) => ui::dialog::error::show_try_again(siv, err),
                 }
             })
             .button(t!("button.close"), |siv| {

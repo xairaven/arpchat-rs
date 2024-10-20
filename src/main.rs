@@ -12,11 +12,7 @@ extern crate rust_i18n;
 rust_i18n::i18n!("locales", fallback = "English");
 
 fn main() {
-    logger::init(
-        config::lock_get_log_level(),
-        &config::lock_get_log_filename(),
-    )
-    .unwrap_or_else(|err| {
+    logger::init(config::lock_get_log_level()).unwrap_or_else(|err| {
         println!("Logger initialization failed. Error: {}", err);
         std::process::exit(1);
     });

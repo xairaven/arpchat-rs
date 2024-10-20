@@ -41,15 +41,6 @@ pub fn init(siv: &mut Cursive, ui_tx: Sender<UICommand>) {
                     }
                 })
                 .delimiter()
-                .leaf(t!("menu.log_filename"), {
-                    let ui_tx = ui_tx.clone();
-                    move |siv| {
-                        ui::dialog::logger_settings::show_settings_log_filename(
-                            siv,
-                            ui_tx.clone(),
-                        );
-                    }
-                })
                 .leaf(t!("menu.log_level"), {
                     let ui_tx = ui_tx.clone();
                     move |siv| {

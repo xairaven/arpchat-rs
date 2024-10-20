@@ -16,26 +16,17 @@ pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::load())
 const CONFIG_FILENAME: &str = "config.toml";
 
 pub const DEFAULT_LOG_LEVEL_FILTER: LevelFilter = LevelFilter::Warn;
-pub const DEFAULT_LOG_FILENAME: &str = "log.txt";
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Config {
     pub ether_type: Option<EtherType>,
     pub interface_name: Option<String>,
     pub language: Option<String>,
-    pub log_filename: Option<String>,
     pub log_level: Option<String>,
     pub username: Option<String>,
 }
 
 impl Config {
-    pub fn get_log_filename(&self) -> Option<String> {
-        match self.log_filename {
-            Some(ref filename) if !filename.is_empty() => Some(filename.to_string()),
-            _ => Some(DEFAULT_LOG_FILENAME.to_string()),
-        }
-    }
-
     pub fn get_log_level(&self) -> Option<LevelFilter> {
         let level = self
             .log_level
@@ -114,16 +105,6 @@ pub fn lock_get_ether_type() -> EtherType {
         .ok()
         .and_then(|locked_config| locked_config.ether_type)
         .unwrap_or_default()
-}
-
-pub fn lock_get_log_filename() -> String {
-    if let Ok(config) = CONFIG.try_lock() {
-        if let Some(filename) = config.get_log_filename() {
-            return filename.to_string();
-        }
-    }
-
-    DEFAULT_LOG_FILENAME.to_string()
 }
 
 pub fn lock_get_log_level() -> LevelFilter {
