@@ -3,7 +3,7 @@ name = "arpchat-rs"
 version = "0.1.0"
 authors = ["Alex Kovalov <alexkovalevkpi@gmail.com>"]
 edition = "2021"
-rust-version = "1.81"
+rust-version = "1.82"
 build = "build.rs"
 
 [dependencies]
