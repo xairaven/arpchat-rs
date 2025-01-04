@@ -1,3 +1,6 @@
+# Possible folder for WinPCap
+lib/
+
 # Remove folder, that contains RustRover’s project specific settings files.
 .idea/
 
