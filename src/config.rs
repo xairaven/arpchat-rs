@@ -58,9 +58,8 @@ impl Config {
     pub fn load() -> Self {
         match Self::get_config_path() {
             Ok(path) => {
-                let data = fs::read(path).unwrap_or_default();
-                let data: &str = str::from_utf8(&data).unwrap_or_default();
-                toml::from_str(data).unwrap_or_default()
+                let data = fs::read_to_string(&path).unwrap_or_default();
+                toml::from_str(&data).unwrap_or_default()
             },
             Err(_) => Default::default(),
         }
