@@ -3,16 +3,15 @@ use crate::net::ether_type::EtherType;
 use crate::session_settings;
 use directories::ProjectDirs;
 use log::LevelFilter;
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str;
 use std::str::FromStr;
 use std::string::ToString;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use std::{env, fs};
 
-pub static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| Mutex::new(Config::load()));
+pub static CONFIG: LazyLock<Mutex<Config>> = LazyLock::new(|| Mutex::new(Config::load()));
 const CONFIG_FILENAME: &str = "config.toml";
 
 pub const DEFAULT_LOG_LEVEL_FILTER: LevelFilter = LevelFilter::Warn;
