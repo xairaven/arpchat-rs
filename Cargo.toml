@@ -2,27 +2,27 @@
 name = "arpchat-rs"
 version = "1.0.1"
 authors = ["Alex Kovalov <alexkovalevkpi@gmail.com>"]
-edition = "2021"
-rust-version = "1.84"
+edition = "2024"
+rust-version = "1.87"
 build = "build.rs"
 
 [dependencies]
-chrono = "0.4.39"
+chrono = "0.4.41"
 crossbeam = "0.8.4"
 cursive = { version = "0.21.1", features = ["ansi", "toml"]}
 directories = "6.0.0"
 fern = "0.7.1"
-gethostname = "0.5.0"
-log = "0.4.25"
+gethostname = "1.0.2"
+log = "0.4.27"
 pnet = "0.35.0"
-rand = "0.8.5"
-rust-i18n = "3.1.2"
-thiserror = "2.0.11"
-toml = "0.8.19"
-serde = { version = "1.0.217", features = ["derive"] }
-strum = { version = "0.26.3", features = ["strum_macros"]}
-strum_macros = "0.26.4"
+rand = "0.9.1"
+rust-i18n = "3.1.4"
+serde = { version = "1.0.219", features = ["derive"] }
+strum = { version = "0.27.1", features = ["strum_macros"]}
+strum_macros = "0.27.1"
 smaz = "0.1.0"
+thiserror = "2.0.12"
+toml = "0.8.22"
 
 [profile.release]
 lto = true

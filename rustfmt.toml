@@ -1,11 +1,19 @@
-edition = "2021"
-fn_params_layout = "Compressed"
-hard_tabs = false
-match_block_trailing_comma = true
+# Stable configuration
+edition = "2024"
+
+# Width and alignment
 max_width = 90
-merge_derives = true
+hard_tabs = false
+tab_spaces = 4
+
+# Imports
 reorder_imports = true
 reorder_modules = true
-tab_spaces = 4
+
+# Misc
+chain_width = 60
+fn_params_layout = "Compressed"
+match_block_trailing_comma = true
+merge_derives = true
 use_field_init_shorthand = true
 use_try_shorthand = true
